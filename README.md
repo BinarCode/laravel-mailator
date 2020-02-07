@@ -9,7 +9,7 @@
     <a href="https://packagist.org/packages/BinarCode/larave-mailator"><img src="https://poser.pugx.org/BinarCode/larave-mailator/license.svg" alt="License"></a>
 </p>
 
-This is where your description should go. Try and limit it to a paragraph or two, and maybe throw in a mention of what PSRs you support to avoid any confusion with users and contributors.
+Laravel Mailator provides a featherweight system for configure email scheduler and email templates based on application events.
 
 ## Installation
 
