@@ -1,0 +1,54 @@
+{
+    "name": "binarcode/laravel-mailator",
+    "description": "Laravel email scheduler",
+    "keywords": [
+        "binarcode",
+        "laravel-mailator"
+    ],
+    "homepage": "https://github.com/binarcode/laravel-mailator",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Eduard Lupacescu",
+            "email": "eduard.lupacescu@binarcode.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.1",
+        "illuminate/support": "^6.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^4.0",
+        "phpunit/phpunit": "^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Binarcode\\LaravelMailator\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Binarcode\\LaravelMailator\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Binarcode\\LaravelMailator\\LaravelMailatorServiceProvider"
+            ],
+            "aliases": {
+                "LaravelMailator": "Binarcode\\LaravelMailator\\LaravelMailatorFacade"
+            }
+        }
+    }
+}
