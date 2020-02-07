@@ -12,11 +12,12 @@
         {
             "name": "Eduard Lupacescu",
             "email": "eduard.lupacescu@binarcode.com",
+            "homepage": "https://binarcode.com",
             "role": "Developer"
         }
     ],
     "require": {
-        "php": "^7.1",
+        "php": "^7.2",
         "illuminate/support": "^6.0"
     },
     "require-dev": {
