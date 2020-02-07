@@ -1,12 +1,12 @@
 <p align="center"><img src="https://github.com/BinarCode/laravel-mailator/blob/master/docs/logo.png"></p>
 
 <p align="center">
-    <a href="https://travis-ci.org/binaryk/larave-mailator"><img src="https://travis-ci.org/binaryk/larave-mailator.svg" alt="Build Status"></a>
-    <a href="https://packagist.org/packages/binaryk/larave-mailator"><img src="https://poser.pugx.org/binaryk/larave-mailator/d/total.svg" alt="Total Downloads"></a>
-    <a href="https://packagist.org/packages/binaryk/larave-mailator"><img src="https://poser.pugx.org/binaryk/larave-mailator/v/stable.svg" alt="Latest Stable Version"></a>
-        <a href="https://scrutinizer-ci.com/g/binaryk/larave-mailator"><img src="https://img.shields.io/scrutinizer/coverage/g/binaryk/larave-mailator.svg" alt="Test Coverage"></a>
-    <a href="https://scrutinizer-ci.com/g/binaryk/larave-mailator"><img src="https://img.shields.io/scrutinizer/g/binaryk/larave-mailator.svg" alt="Quality"></a>
-    <a href="https://packagist.org/packages/binaryk/larave-mailator"><img src="https://poser.pugx.org/binaryk/larave-mailator/license.svg" alt="License"></a>
+    <a href="https://travis-ci.org/BinarCode/larave-mailator"><img src="https://travis-ci.org/BinarCode/larave-mailator.svg" alt="Build Status"></a>
+    <a href="https://packagist.org/packages/binarcode/larave-mailator"><img src="https://poser.pugx.org/binarcode/larave-mailator/d/total.svg" alt="Total Downloads"></a>
+    <a href="https://packagist.org/packages/binarcode/larave-mailator"><img src="https://poser.pugx.org/binarcode/larave-mailator/v/stable.svg" alt="Latest Stable Version"></a>
+        <a href="https://scrutinizer-ci.com/g/BinarCode/laravel-mailator"><img src="https://scrutinizer-ci.com/g/BinarCode/laravel-mailator/badges/quality-score.png?b=master" alt="Quality"></a>
+    <a href="https://scrutinizer-ci.com/g/BinarCode/laravel-mailator"><img src="https://scrutinizer-ci.com/g/BinarCode/laravel-mailator/badges/build.png?b=master" alt="Test Coverage"></a>
+    <a href="https://packagist.org/packages/BinarCode/larave-mailator"><img src="https://poser.pugx.org/BinarCode/larave-mailator/license.svg" alt="License"></a>
 </p>
 
 This is where your description should go. Try and limit it to a paragraph or two, and maybe throw in a mention of what PSRs you support to avoid any confusion with users and contributors.
