@@ -1,4 +1,4 @@
-![alt text](https://github.com/binarcode/laravel-mailator/docs/logo.png "Laravel Mailator")
+<p align="center"><img src="https://github.com/BinarCode/laravel-mailator/blob/master/docs/logo.png"></p>
 
 <p align="center">
     <a href="https://travis-ci.org/binaryk/larave-mailator"><img src="https://travis-ci.org/binaryk/larave-mailator.svg" alt="Build Status"></a>
