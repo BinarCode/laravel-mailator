@@ -3,3 +3,7 @@ composer.lock
 docs
 vendor
 coverage
+.idea
+output
+docs/node_modules
+docs/.vuepress/dist
