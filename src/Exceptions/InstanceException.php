@@ -9,6 +9,6 @@ class InstanceException extends Exception
 {
     public static function throw(string $actual)
     {
-        return new static("Expected instance of " . MailatorEvent::class . ", given [$actual].");
+        return new static('Expected instance of '.MailatorEvent::class.", given [$actual].");
     }
 }
