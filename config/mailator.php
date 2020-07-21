@@ -2,7 +2,7 @@
 
 return [
     /**
-     > The table name for the main schedulers.
+     * > The table name for the main schedulers.
      */
     'schedulers_table_name' => 'mailator_schedulers',
 
@@ -12,7 +12,7 @@ return [
     'logs_table' => 'mailator_logs',
 
     /**
-     > The base model for the mail schedule.
+     * > The base model for the mail schedule.
      */
     'scheduler_model' => Binarcode\LaravelMailator\Models\MailatorSchedule::class,
 ];
