@@ -3,6 +3,8 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Binarcode\LaravelMailator\Models\MailatorLog;
+use Binarcode\LaravelMailator\Models\MailatorSchedule;
 
 class CreateMailatorTables extends Migration
 {
@@ -12,8 +14,43 @@ class CreateMailatorTables extends Migration
             $table->bigIncrements('id');
 
             $table->string('name', 100)->nullable();
+            $table->string('mailable_class');
+            $table->unsignedInteger('delay_minutes')->nullable()->comment('Number of hours/days.');
+            $table->enum('time_frame_origin', [
+                MailatorSchedule::TIME_FRAME_ORIGIN_BEFORE,
+                MailatorSchedule::TIME_FRAME_ORIGIN_AFTER,
+            ])->nullable()->comment('Before or after event.');
+            $table->json('events')->nullable()->comment('Offset target.');
+            $table->text('when')->nullable();
+            $table->enum('frequency_option', [
+                MailatorSchedule::FREQUENCY_OPTIONS_ONCE,
+                MailatorSchedule::FREQUENCY_OPTIONS_HOURLY,
+                MailatorSchedule::FREQUENCY_OPTIONS_DAILY,
+                MailatorSchedule::FREQUENCY_OPTIONS_WEEKLY,
+            ])->default(MailatorSchedule::FREQUENCY_OPTIONS_ONCE)->comment('How often send email notification.');
 
             $table->timestamps();
+        });
+
+        Schema::create(config('mailator.logs_table', 'mailator_logs'), function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('name')->nullable();
+            $table->string('recipient_email')->nullable();
+            $table->unsignedInteger('mailator_schedule_id')->nullable();
+            $table->enum('status', [
+                MailatorLog::STATUS_FAILED,
+                MailatorLog::STATUS_SENT,
+            ]);
+            $table->dateTime('action_at')->nullable();
+            $table->text('exception')->nullable();
+            $table->timestamps();
+
+            /**
+             * Foreign keys
+             */
+            $table->foreign('mailator_schedule_id')
+                ->references('id')
+                ->on(config('mailator.schedulers_table_name', 'mailator_schedulers'));
         });
     }
 }

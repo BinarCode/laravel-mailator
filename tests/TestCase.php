@@ -3,7 +3,10 @@
 namespace Binarcode\LaravelMailator\Tests;
 
 use Binarcode\LaravelMailator\LaravelMailatorServiceProvider;
+use Illuminate\Contracts\View\Factory;
+use Mockery as m;
 use Orchestra\Testbench\TestCase as Orchestra;
+use Swift_Mailer;
 
 class TestCase extends Orchestra
 {
@@ -12,6 +15,11 @@ class TestCase extends Orchestra
         parent::setUp();
 
         $this->withFactories(__DIR__.'/database/factories');
+    }
+
+    protected function tearDown(): void
+    {
+        m::close();
     }
 
     protected function getPackageProviders($app)
@@ -33,5 +41,10 @@ class TestCase extends Orchestra
 
         include_once __DIR__.'/../database/migrations/create_mailator_tables.php.stub';
         (new \CreateMailatorTables())->up();
+    }
+
+    protected function getMocks()
+    {
+        return ['smtp', m::mock(Factory::class), m::mock(Swift_Mailer::class)];
     }
 }
