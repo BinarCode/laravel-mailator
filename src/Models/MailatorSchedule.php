@@ -37,12 +37,12 @@ class MailatorSchedule extends Model
     const FREQUENCY_IN_HOURS = [
         'single' => PHP_INT_MAX,
         'hourly' => 1,
-        'daily'  => self::HOURS_IN_DAY,
+        'daily' => self::HOURS_IN_DAY,
         'weekly' => self::HOURS_IN_WEEK,
     ];
 
     const DELAY_OPTIONS = [
-        '24'  => 'Days',
+        '24' => 'Days',
         '168' => 'Weeks',
     ];
 
@@ -169,7 +169,7 @@ class MailatorSchedule extends Model
 
     public function event(string $event)
     {
-        if (!is_a(MailatorEvent::class, $event)) {
+        if (! is_a(MailatorEvent::class, $event)) {
             InstanceException::throw($event);
         }
 
