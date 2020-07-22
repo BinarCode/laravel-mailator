@@ -21,8 +21,8 @@ class LaravelMailatorServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../config/config.php' => config_path('laravel-mailator.php'),
-            ], 'config');
+                __DIR__.'/../config/mailator.php' => config_path('mailator.php'),
+            ], 'mailator-config');
 
             // Publishing the views.
             /*$this->publishes([
@@ -50,10 +50,10 @@ class LaravelMailatorServiceProvider extends ServiceProvider
     public function register()
     {
         // Automatically apply the package configuration
-        $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'laravel-mailator');
+        $this->mergeConfigFrom(__DIR__.'/../config/mailator.php', 'mailator');
 
         // Register the main class to use with the facade
-        $this->app->singleton('laravel-mailator', function () {
+        $this->app->singleton('mailator', function () {
             return new LaravelMailator();
         });
     }
