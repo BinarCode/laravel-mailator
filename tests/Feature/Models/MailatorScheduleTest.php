@@ -68,7 +68,7 @@ class MailatorScheduleTest extends TestCase
 
         MailatorSchedule::init('Invoice reminder.')
             ->recipients([
-                'foo@bar.com',
+                'zoo@bar.com',
             ])
             ->mailable(
                 (new InvoiceReminderMailable())->to('foo@bar.com')
@@ -82,5 +82,17 @@ class MailatorScheduleTest extends TestCase
         $_SERVER['can_send'] = true;
         MailatorSchedule::run();
         Mail::assertSent(InvoiceReminderMailable::class, 1);
+
+        $_SERVER['can_send'] = false;
+
+        MailatorSchedule::run();
+        Mail::assertSent(InvoiceReminderMailable::class, 1);
+
+        MailatorSchedule::run();
+        Mail::assertSent(InvoiceReminderMailable::class, 1);
+
+        Mail::assertSent(InvoiceReminderMailable::class, function (InvoiceReminderMailable  $mail) {
+            return $mail->hasTo('foo@bar.com') && $mail->hasTo('zoo@bar.com');
+        });
     }
 }

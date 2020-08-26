@@ -23,10 +23,6 @@ class SendMailAction
     protected function sendMail(MailatorSchedule $schedule)
     {
         //todo - apply replacers for variables maybe
-        if (empty($schedule->getRecipients())) {
-            return;
-        }
-
         Mail::to($schedule->getRecipients())->send(
             $schedule->getMailable()
         );
