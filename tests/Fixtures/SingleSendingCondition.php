@@ -3,14 +3,13 @@
 namespace Binarcode\LaravelMailator\Tests\Fixtures;
 
 use Binarcode\LaravelMailator\MailatorEvent;
-use Binarcode\LaravelMailator\Models\MailatorLog;
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use Illuminate\Support\Collection;
 
-class BeforeInvoiceExpires implements MailatorEvent
+class SingleSendingCondition implements MailatorEvent
 {
-    public function canSend(MailatorSchedule $mailatorSchedule, Collection $log): bool
+    public function canSend(MailatorSchedule $mailatorSchedule, Collection $logs): bool
     {
-        return true;
+        return $_SERVER['can_send'];
     }
 }

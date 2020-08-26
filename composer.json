@@ -19,7 +19,8 @@
     "require": {
         "php": "^7.4",
         "illuminate/support": "^7.0",
-        "opis/closure": "^3.5"
+        "opis/closure": "^3.5",
+        "spatie/test-time": "^1.2"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.16",

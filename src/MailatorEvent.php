@@ -2,10 +2,10 @@
 
 namespace Binarcode\LaravelMailator;
 
-use Binarcode\LaravelMailator\Models\MailatorLog;
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
+use Illuminate\Support\Collection;
 
 interface MailatorEvent
 {
-    public function canSend(MailatorSchedule $mailatorSchedule, MailatorLog $log): bool;
+    public function canSend(MailatorSchedule $mailatorSchedule, Collection $logs): bool;
 }

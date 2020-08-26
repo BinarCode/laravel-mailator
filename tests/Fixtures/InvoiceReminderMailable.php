@@ -14,7 +14,7 @@ class InvoiceReminderMailable extends Mailable implements ShouldQueue
     {
         $this
             ->subject('lorem ipsum')
-            ->html('foo bar baz')
+            ->view('laravel-mailator::mails.stub_invoice_reminder_view')
             ->to('foo@example.tld');
 
         return $this;

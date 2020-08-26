@@ -14,13 +14,14 @@ class CreateMailatorTables extends Migration
             $table->bigIncrements('id');
 
             $table->string('name', 100)->nullable();
-            $table->string('mailable_class');
+            $table->text('mailable_class');
             $table->unsignedInteger('delay_minutes')->nullable()->comment('Number of hours/days.');
             $table->enum('time_frame_origin', [
                 MailatorSchedule::TIME_FRAME_ORIGIN_BEFORE,
                 MailatorSchedule::TIME_FRAME_ORIGIN_AFTER,
             ])->nullable()->comment('Before or after event.');
             $table->json('events')->nullable()->comment('Offset target.');
+            $table->json('recipients')->nullable();
             $table->text('when')->nullable();
             $table->enum('frequency_option', [
                 MailatorSchedule::FREQUENCY_OPTIONS_ONCE,
@@ -29,13 +30,16 @@ class CreateMailatorTables extends Migration
                 MailatorSchedule::FREQUENCY_OPTIONS_WEEKLY,
             ])->default(MailatorSchedule::FREQUENCY_OPTIONS_ONCE)->comment('How often send email notification.');
 
+            $table->timestamp('last_sent_at')->nullable();
+            $table->timestamp('last_failed_at')->nullable();
+            $table->text('failure_reason')->nullable();
             $table->timestamps();
         });
 
         Schema::create(config('mailator.logs_table', 'mailator_logs'), function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name')->nullable();
-            $table->string('recipient_email')->nullable();
+            $table->json('recipients')->nullable();
             $table->unsignedInteger('mailator_schedule_id')->nullable();
             $table->enum('status', [
                 MailatorLog::STATUS_FAILED,

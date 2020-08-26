@@ -11,8 +11,22 @@ return [
      */
     'logs_table' => 'mailator_logs',
 
-    /**
-     * > The base model for the mail schedule.
-     */
-    'scheduler_model' => Binarcode\LaravelMailator\Models\MailatorSchedule::class,
+    'scheduler' => [
+        /**
+         * > The base model for the mail schedule.
+         */
+        'model' => Binarcode\LaravelMailator\Models\MailatorSchedule::class,
+
+        /**
+        > The queue used for sending emails.
+         */
+        'send_mail_job_queue' => 'default',
+
+        /**
+        > The email sender class. It will be executed from the sender job.
+         */
+        'send_mail_action' => Binarcode\LaravelMailator\Actions\SendMailAction::class,
+    ],
+
+    'log_model' => Binarcode\LaravelMailator\Models\MailatorLog::class,
 ];

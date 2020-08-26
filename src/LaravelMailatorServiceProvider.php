@@ -2,6 +2,8 @@
 
 namespace Binarcode\LaravelMailator;
 
+use Binarcode\LaravelMailator\Models\MailatorLog;
+use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use Illuminate\Support\ServiceProvider;
 
 class LaravelMailatorServiceProvider extends ServiceProvider
@@ -11,11 +13,19 @@ class LaravelMailatorServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        if (config('mailator.scheduler.model')) {
+            $this->app->bind(MailatorSchedule::class, config('mailator.model'));
+        }
+
+        if (config('mailator.log_model')) {
+            $this->app->bind(MailatorLog::class, config('mailator.log_model'));
+        }
+
         /*
          * Optional methods to load your package assets
          */
         // $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'laravel-mailator');
-        // $this->loadViewsFrom(__DIR__.'/../resources/views', 'laravel-mailator');
+         $this->loadViewsFrom(__DIR__.'/../resources/views', 'laravel-mailator');
         // $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         // $this->loadRoutesFrom(__DIR__.'/routes.php');
 
