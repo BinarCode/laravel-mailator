@@ -35,32 +35,6 @@ class MailatorScheduleTest extends TestCase
         $this->assertDatabaseCount('mailator_schedulers', 1);
     }
 
-    public function test_can_queue_email_from_mailator()
-    {
-        MailatorSchedule::init('Invoice reminder.')
-            ->mailable(
-                new InvoiceReminderMailable()
-            )
-            ->days(1)
-            ->before(BeforeInvoiceExpiresConstraint::class)
-            ->save();
-
-        $mailator = MailatorSchedule::first();
-
-        $queueFake = new QueueFake(new Application());
-
-        $mailer = $this->getMockBuilder(Mailer::class)
-            ->setConstructorArgs($this->getMocks())
-            ->setMethods(['createMessage', 'to'])
-            ->getMock();
-
-        $mailer->setQueue($queueFake);
-        $mailable = unserialize($mailator->mailable_class);
-        $queueFake->assertNothingPushed();
-        $mailer->send($mailable);
-        $queueFake->assertPushedOn(null, SendQueuedMailable::class);
-    }
-
     public function test_sending_email_only_once()
     {
         Mail::fake();
