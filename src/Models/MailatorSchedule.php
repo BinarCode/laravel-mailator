@@ -11,7 +11,8 @@ use Illuminate\Support\Arr;
 use Opis\Closure\SerializableClosure;
 
 /**
- * Class MailatorSchedule
+ * Class MailatorSchedule.
+ *
  * @property string mailable_class
  * @property string delay_minutes
  * @property string delay_option
@@ -19,7 +20,6 @@ use Opis\Closure\SerializableClosure;
  * @property array events
  * @property Closure when
  * @property string frequency_option
- * @package Binarcode\LaravelMailator\Models
  */
 class MailatorSchedule extends Model
 {
@@ -37,12 +37,12 @@ class MailatorSchedule extends Model
     const FREQUENCY_IN_HOURS = [
         'single' => PHP_INT_MAX,
         'hourly' => 1,
-        'daily' => self::HOURS_IN_DAY,
+        'daily'  => self::HOURS_IN_DAY,
         'weekly' => self::HOURS_IN_WEEK,
     ];
 
     const DELAY_OPTIONS = [
-        '24' => 'Days',
+        '24'  => 'Days',
         '168' => 'Weeks',
     ];
 
@@ -77,9 +77,9 @@ class MailatorSchedule extends Model
         'end_at',
     ];
 
-    public static function init(string $name): MailatorSchedule
+    public static function init(string $name): self
     {
-        return new static(['name' => $name,]);
+        return new static(['name' => $name]);
     }
 
     public function mailable(Mailable $mailable)
@@ -169,7 +169,7 @@ class MailatorSchedule extends Model
 
     public function event(string $event)
     {
-        if (! is_a(MailatorEvent::class, $event)) {
+        if (!is_a(MailatorEvent::class, $event)) {
             InstanceException::throw($event);
         }
 
