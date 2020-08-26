@@ -209,21 +209,22 @@ class MailatorSchedule extends Model
         return $this->hasMany(MailatorLog::class, 'mailator_schedule_id');
     }
 
+    public function shouldSend()
+    {
+        $this->load('logs');
+
+        return collect($this->events)
+            ->map(fn($event) => app($event))
+            ->filter(fn($event) => is_subclass_of($event, SendScheduleConstraint::class))
+            ->every(fn(SendScheduleConstraint $event) => $event->canSend($this, $this->logs));
+    }
+
     public static function run()
     {
         static::query()
             ->cursor()
-            ->filter(function (self $schedule) {
-                $schedule->load('logs');
-
-                return collect($schedule->events)
-                    ->map(fn($event) => app($event))
-                    ->filter(fn($event) => is_subclass_of($event, SendScheduleConstraint::class))
-                    ->every(fn(SendScheduleConstraint $event) => $event->canSend($schedule, $schedule->logs));
-            })
-            ->each(function (self $schedule) {
-                dispatch(new SendMailJob($schedule));
-            });
+            ->filter(fn (self $schedule) => $schedule->shouldSend())
+            ->each(fn (self $schedule) => dispatch(new SendMailJob($schedule)));
     }
 
     public function getMailable(): Mailable
