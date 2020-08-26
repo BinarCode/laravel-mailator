@@ -189,7 +189,7 @@ class MailatorSchedule extends Model
     public function recipients(array $recipients): self
     {
         $this->recipients = collect($recipients)
-            ->filter(fn($email) => $this->ensureValidEmail($email))
+            ->filter(fn ($email) => $this->ensureValidEmail($email))
             ->toArray();
 
         return $this;
@@ -217,9 +217,9 @@ class MailatorSchedule extends Model
                 $schedule->load('logs');
 
                 return collect($schedule->events)
-                    ->map(fn($event) => app($event))
-                    ->filter(fn($event) => is_subclass_of($event, SendScheduleConstraint::class))
-                    ->every(fn(SendScheduleConstraint $event) => $event->canSend($schedule, $schedule->logs));
+                    ->map(fn ($event) => app($event))
+                    ->filter(fn ($event) => is_subclass_of($event, SendScheduleConstraint::class))
+                    ->every(fn (SendScheduleConstraint $event) => $event->canSend($schedule, $schedule->logs));
             })
             ->each(function (self $schedule) {
                 dispatch(new SendMailJob($schedule));
@@ -269,14 +269,15 @@ class MailatorSchedule extends Model
     public function getRecipients(): array
     {
         return collect($this->recipients)
-            ->filter(fn($email) => $this->ensureValidEmail($email))
+            ->filter(fn ($email) => $this->ensureValidEmail($email))
             ->toArray();
     }
 
     protected function ensureValidEmail(string $email): bool
     {
-        return !Validator::make(
+        return ! Validator::make(
             compact('email'),
-            ['email' => 'required|email'])->fails();
+            ['email' => 'required|email']
+        )->fails();
     }
 }
