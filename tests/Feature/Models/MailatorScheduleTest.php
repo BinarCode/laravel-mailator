@@ -7,11 +7,7 @@ use Binarcode\LaravelMailator\Tests\Fixtures\BeforeInvoiceExpiresConstraint;
 use Binarcode\LaravelMailator\Tests\Fixtures\InvoiceReminderMailable;
 use Binarcode\LaravelMailator\Tests\Fixtures\SingleSendingCondition;
 use Binarcode\LaravelMailator\Tests\TestCase;
-use Illuminate\Foundation\Application;
-use Illuminate\Mail\Mailer;
-use Illuminate\Mail\SendQueuedMailable;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Testing\Fakes\QueueFake;
 
 class MailatorScheduleTest extends TestCase
 {
