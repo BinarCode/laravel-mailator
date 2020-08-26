@@ -20,4 +20,3 @@ class InvoiceReminderMailable extends Mailable implements ShouldQueue
         return $this;
     }
 }
-

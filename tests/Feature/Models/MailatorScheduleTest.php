@@ -57,5 +57,4 @@ class MailatorScheduleTest extends TestCase
         $mailer->send($mailable);
         $queueFake->assertPushedOn(null, SendQueuedMailable::class);
     }
-
 }

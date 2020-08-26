@@ -4,9 +4,9 @@ namespace Binarcode\LaravelMailator\Models;
 
 use Binarcode\LaravelMailator\Exceptions\InstanceException;
 use Binarcode\LaravelMailator\MailatorEvent;
+use Closure;
 use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Database\Eloquent\Model;
-use Closure;
 use Illuminate\Support\Arr;
 use Opis\Closure\SerializableClosure;
 
