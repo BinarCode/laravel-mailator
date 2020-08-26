@@ -21,7 +21,7 @@ class MailatorScheduleTest extends TestCase
     public function test_can_create_mailator_schedule()
     {
         MailatorSchedule::init('Invoice reminder.')
-            ->mailable(new InvoiceReminderMailable)
+            ->mailable(new InvoiceReminderMailable())
             ->days(1)
             ->before(BeforeInvoiceExpires::class)
             ->when(function () {
@@ -36,7 +36,7 @@ class MailatorScheduleTest extends TestCase
     {
         MailatorSchedule::init('Invoice reminder.')
             ->mailable(
-                new InvoiceReminderMailable
+                new InvoiceReminderMailable()
             )
             ->days(1)
             ->before(BeforeInvoiceExpires::class)
@@ -44,7 +44,7 @@ class MailatorScheduleTest extends TestCase
 
         $mailator = MailatorSchedule::first();
 
-        $queueFake = new QueueFake(new Application);
+        $queueFake = new QueueFake(new Application());
 
         $mailer = $this->getMockBuilder(Mailer::class)
             ->setConstructorArgs($this->getMocks())
