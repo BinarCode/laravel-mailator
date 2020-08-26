@@ -176,7 +176,7 @@ class MailatorSchedule extends Model
 
     public function event(string $event)
     {
-        if (!is_a(MailatorEvent::class, $event)) {
+        if (! is_a(MailatorEvent::class, $event)) {
             InstanceException::throw($event);
         }
 
