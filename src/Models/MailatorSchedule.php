@@ -2,12 +2,15 @@
 
 namespace Binarcode\LaravelMailator\Models;
 
+use Binarcode\LaravelMailator\Constraints\SendScheduleConstraint;
 use Binarcode\LaravelMailator\Exceptions\InstanceException;
-use Binarcode\LaravelMailator\MailatorEvent;
+use Binarcode\LaravelMailator\Jobs\SendMailJob;
 use Closure;
 use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Opis\Closure\SerializableClosure;
 
 /**
@@ -18,6 +21,7 @@ use Opis\Closure\SerializableClosure;
  * @property string delay_option
  * @property string time_frame_origin
  * @property array events
+ * @property array recipients
  * @property Closure when
  * @property string frequency_option
  */
@@ -37,12 +41,12 @@ class MailatorSchedule extends Model
     const FREQUENCY_IN_HOURS = [
         'single' => PHP_INT_MAX,
         'hourly' => 1,
-        'daily'  => self::HOURS_IN_DAY,
+        'daily' => self::HOURS_IN_DAY,
         'weekly' => self::HOURS_IN_WEEK,
     ];
 
     const DELAY_OPTIONS = [
-        '24'  => 'Days',
+        '24' => 'Days',
         '168' => 'Weeks',
     ];
 
@@ -54,9 +58,8 @@ class MailatorSchedule extends Model
     const FREQUENCY_OPTIONS_DAILY = 'daily';
     const FREQUENCY_OPTIONS_WEEKLY = 'weekly';
 
-    public $events = [];
-
     protected $fillable = [
+        'recipients',
         'mailable_class',
         'delay_minutes',
         'delay_option',
@@ -64,10 +67,14 @@ class MailatorSchedule extends Model
         'events',
         'when',
         'frequency_option',
+        'last_sent_at',
+        'last_failed_at',
+        'failure_reason',
     ];
 
     protected $casts = [
         'events' => 'array',
+        'recipients' => 'array',
     ];
 
     protected $dates = [
@@ -169,11 +176,21 @@ class MailatorSchedule extends Model
 
     public function event(string $event)
     {
-        if (!is_a(MailatorEvent::class, $event)) {
+        if (! is_a(SendScheduleConstraint::class, $event)) {
             InstanceException::throw($event);
         }
 
         $this->events = Arr::wrap($this->events) + [$event];
+
+
+        return $this;
+    }
+
+    public function recipients(array $recipients): self
+    {
+        $this->recipients = collect($recipients)
+            ->filter(fn ($email) => $this->ensureValidEmail($email))
+            ->toArray();
 
         return $this;
     }
@@ -185,5 +202,83 @@ class MailatorSchedule extends Model
         );
 
         return $this;
+    }
+
+    public function logs()
+    {
+        return $this->hasMany(MailatorLog::class, 'mailator_schedule_id');
+    }
+
+    public function shouldSend()
+    {
+        $this->load('logs');
+
+        return collect($this->events)
+            ->map(fn ($event) => app($event))
+            ->filter(fn ($event) => is_subclass_of($event, SendScheduleConstraint::class))
+            ->every(fn (SendScheduleConstraint $event) => $event->canSend($this, $this->logs));
+    }
+
+    public static function run()
+    {
+        static::query()
+            ->cursor()
+            ->filter(fn (self $schedule) => $schedule->shouldSend())
+            ->each(fn (self $schedule) => dispatch(new SendMailJob($schedule)));
+    }
+
+    public function getMailable(): Mailable
+    {
+        return unserialize($this->mailable_class);
+    }
+
+    public function markAsSent(): self
+    {
+        $this->logs()
+            ->create([
+//                'recipients' => $this->getRecipients(),
+                'status' => MailatorLog::STATUS_SENT,
+                'action_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+        $this->last_sent_at = now();
+        $this->save();
+
+        return $this;
+    }
+
+    public function markAsFailed(string $failureReason): self
+    {
+        $this->logs()->create([
+                'status' => MailatorLog::STATUS_FAILED,
+                'action_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+                'exception' => $failureReason,
+            ]);
+
+        $this->update([
+            'last_failed_at' => now(),
+            'failure_reason' => Str::limit($failureReason, 250),
+        ]);
+
+        return $this;
+    }
+
+    public function getRecipients(): array
+    {
+        return collect($this->recipients)
+            ->filter(fn ($email) => $this->ensureValidEmail($email))
+            ->toArray();
+    }
+
+    protected function ensureValidEmail(string $email): bool
+    {
+        return ! Validator::make(
+            compact('email'),
+            ['email' => 'required|email']
+        )->fails();
     }
 }

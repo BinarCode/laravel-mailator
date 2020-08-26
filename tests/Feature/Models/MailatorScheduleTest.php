@@ -3,13 +3,11 @@
 namespace Binarcode\LaravelMailator\Tests\Feature\Models;
 
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
-use Binarcode\LaravelMailator\Tests\Fixtures\BeforeInvoiceExpires;
+use Binarcode\LaravelMailator\Tests\Fixtures\BeforeInvoiceExpiresConstraint;
 use Binarcode\LaravelMailator\Tests\Fixtures\InvoiceReminderMailable;
+use Binarcode\LaravelMailator\Tests\Fixtures\SingleSendingCondition;
 use Binarcode\LaravelMailator\Tests\TestCase;
-use Illuminate\Foundation\Application;
-use Illuminate\Mail\Mailer;
-use Illuminate\Mail\SendQueuedMailable;
-use Illuminate\Support\Testing\Fakes\QueueFake;
+use Illuminate\Support\Facades\Mail;
 
 class MailatorScheduleTest extends TestCase
 {
@@ -23,7 +21,7 @@ class MailatorScheduleTest extends TestCase
         MailatorSchedule::init('Invoice reminder.')
             ->mailable(new InvoiceReminderMailable())
             ->days(1)
-            ->before(BeforeInvoiceExpires::class)
+            ->before(BeforeInvoiceExpiresConstraint::class)
             ->when(function () {
                 return 'Working.';
             })
@@ -32,29 +30,38 @@ class MailatorScheduleTest extends TestCase
         $this->assertDatabaseCount('mailator_schedulers', 1);
     }
 
-    public function test_can_queue_email_from_mailator()
+    public function test_sending_email_only_once()
     {
+        Mail::fake();
+        Mail::assertNothingSent();
+
         MailatorSchedule::init('Invoice reminder.')
+            ->recipients([
+                'zoo@bar.com',
+            ])
             ->mailable(
-                new InvoiceReminderMailable()
+                (new InvoiceReminderMailable())->to('foo@bar.com')
             )
             ->days(1)
-            ->before(BeforeInvoiceExpires::class)
+            ->before(
+                SingleSendingCondition::class,
+            )
             ->save();
 
-        $mailator = MailatorSchedule::first();
+        $_SERVER['can_send'] = true;
+        MailatorSchedule::run();
+        Mail::assertSent(InvoiceReminderMailable::class, 1);
 
-        $queueFake = new QueueFake(new Application());
+        $_SERVER['can_send'] = false;
 
-        $mailer = $this->getMockBuilder(Mailer::class)
-            ->setConstructorArgs($this->getMocks())
-            ->setMethods(['createMessage', 'to'])
-            ->getMock();
+        MailatorSchedule::run();
+        Mail::assertSent(InvoiceReminderMailable::class, 1);
 
-        $mailer->setQueue($queueFake);
-        $mailable = unserialize($mailator->mailable_class);
-        $queueFake->assertNothingPushed();
-        $mailer->send($mailable);
-        $queueFake->assertPushedOn(null, SendQueuedMailable::class);
+        MailatorSchedule::run();
+        Mail::assertSent(InvoiceReminderMailable::class, 1);
+
+        Mail::assertSent(InvoiceReminderMailable::class, function (InvoiceReminderMailable  $mail) {
+            return $mail->hasTo('foo@bar.com') && $mail->hasTo('zoo@bar.com');
+        });
     }
 }

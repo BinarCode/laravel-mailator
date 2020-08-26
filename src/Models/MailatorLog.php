@@ -16,7 +16,7 @@ class MailatorLog extends Model
 
     protected $fillable = [
         'name',
-        'recipient_email',
+        'recipients',
         'mailator_schedule_id',
         'status',
         'action_at',
@@ -25,9 +25,10 @@ class MailatorLog extends Model
         'updated_at',
     ];
 
-    protected $dates = [
-        'action_at',
-        'created_at',
-        'updated_at',
+    protected $cast = [
+        'action_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'recipients' => 'array',
     ];
 }
