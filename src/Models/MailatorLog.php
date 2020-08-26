@@ -31,6 +31,4 @@ class MailatorLog extends Model
         'updated_at' => 'datetime',
         'recipients' => 'array',
     ];
-
-
 }

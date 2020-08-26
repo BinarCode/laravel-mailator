@@ -25,7 +25,7 @@ class LaravelMailatorServiceProvider extends ServiceProvider
          * Optional methods to load your package assets
          */
         // $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'laravel-mailator');
-         $this->loadViewsFrom(__DIR__.'/../resources/views', 'laravel-mailator');
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'laravel-mailator');
         // $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         // $this->loadRoutesFrom(__DIR__.'/routes.php');
 

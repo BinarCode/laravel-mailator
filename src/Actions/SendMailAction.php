@@ -35,5 +35,4 @@ class SendMailAction
 
         event(new ScheduleMailSentEvent($schedule));
     }
-
 }

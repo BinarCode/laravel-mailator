@@ -3,7 +3,6 @@
 namespace Binarcode\LaravelMailator\Tests\Fixtures;
 
 use Binarcode\LaravelMailator\MailatorEvent;
-use Binarcode\LaravelMailator\Models\MailatorLog;
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use Illuminate\Support\Collection;
 
