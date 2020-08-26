@@ -2,11 +2,11 @@
 
 namespace Binarcode\LaravelMailator\Tests\Fixtures;
 
-use Binarcode\LaravelMailator\MailatorEvent;
+use Binarcode\LaravelMailator\Constraints\SendScheduleConstraint;
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use Illuminate\Support\Collection;
 
-class SingleSendingCondition implements MailatorEvent
+class SingleSendingCondition implements SendScheduleConstraint
 {
     public function canSend(MailatorSchedule $mailatorSchedule, Collection $logs): bool
     {

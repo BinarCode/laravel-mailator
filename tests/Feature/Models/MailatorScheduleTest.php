@@ -3,7 +3,7 @@
 namespace Binarcode\LaravelMailator\Tests\Feature\Models;
 
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
-use Binarcode\LaravelMailator\Tests\Fixtures\BeforeInvoiceExpires;
+use Binarcode\LaravelMailator\Tests\Fixtures\BeforeInvoiceExpiresConstraint;
 use Binarcode\LaravelMailator\Tests\Fixtures\InvoiceReminderMailable;
 use Binarcode\LaravelMailator\Tests\Fixtures\SingleSendingCondition;
 use Binarcode\LaravelMailator\Tests\TestCase;
@@ -25,7 +25,7 @@ class MailatorScheduleTest extends TestCase
         MailatorSchedule::init('Invoice reminder.')
             ->mailable(new InvoiceReminderMailable())
             ->days(1)
-            ->before(BeforeInvoiceExpires::class)
+            ->before(BeforeInvoiceExpiresConstraint::class)
             ->when(function () {
                 return 'Working.';
             })
@@ -41,7 +41,7 @@ class MailatorScheduleTest extends TestCase
                 new InvoiceReminderMailable()
             )
             ->days(1)
-            ->before(BeforeInvoiceExpires::class)
+            ->before(BeforeInvoiceExpiresConstraint::class)
             ->save();
 
         $mailator = MailatorSchedule::first();

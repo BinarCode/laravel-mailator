@@ -27,6 +27,7 @@ class SendMailAction
             return;
         }
 
+        dd($schedule->getMailable());
         Mail::to($schedule->getRecipients())->send(
             $schedule->getMailable()
         );

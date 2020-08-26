@@ -2,9 +2,9 @@
 
 namespace Binarcode\LaravelMailator\Models;
 
+use Binarcode\LaravelMailator\Constraints\SendScheduleConstraint;
 use Binarcode\LaravelMailator\Exceptions\InstanceException;
 use Binarcode\LaravelMailator\Jobs\SendMailJob;
-use Binarcode\LaravelMailator\MailatorEvent;
 use Closure;
 use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Database\Eloquent\Model;
@@ -176,7 +176,7 @@ class MailatorSchedule extends Model
 
     public function event(string $event)
     {
-        if (! is_a(MailatorEvent::class, $event)) {
+        if (! is_a(SendScheduleConstraint::class, $event)) {
             InstanceException::throw($event);
         }
 
@@ -218,8 +218,8 @@ class MailatorSchedule extends Model
 
                 return collect($schedule->events)
                     ->map(fn($event) => app($event))
-                    ->filter(fn($event) => is_subclass_of($event, MailatorEvent::class))
-                    ->every(fn(MailatorEvent $event) => $event->canSend($schedule, $schedule->logs));
+                    ->filter(fn($event) => is_subclass_of($event, SendScheduleConstraint::class))
+                    ->every(fn(SendScheduleConstraint $event) => $event->canSend($schedule, $schedule->logs));
             })
             ->each(function (self $schedule) {
                 dispatch(new SendMailJob($schedule));
