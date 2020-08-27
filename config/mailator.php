@@ -29,4 +29,18 @@ return [
     ],
 
     'log_model' => Binarcode\LaravelMailator\Models\MailatorLog::class,
+
+    'templates' => [
+        /**
+         > The email layout, used to wrap the template.
+         */
+        'laravel-mailator::mails.template_layout' => 'laravel-mailator::mails.template_layout',
+
+        /**
+        > The default list with replacers for the template.
+         */
+        'replacers' => [
+            Binarcode\LaravelMailator\Replacers\SampleReplacer::class,
+        ],
+    ],
 ];
