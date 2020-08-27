@@ -77,7 +77,7 @@ trait WithMailTemplate
 
     private function ensureValidView()
     {
-        if (!$this->markdown) {
+        if (! $this->markdown) {
             $this->markdown($this->getLayout());
         }
 

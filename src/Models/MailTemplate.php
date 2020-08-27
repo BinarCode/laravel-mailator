@@ -68,4 +68,3 @@ class MailTemplate extends Model implements MailTemplateable
         return $this->html;
     }
 }
-

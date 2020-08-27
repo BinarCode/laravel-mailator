@@ -14,4 +14,3 @@ class PersonalizeMailAction
             ->reduce(fn (string $html, Replacer $replacer) => $replacer->replace($html, $template), $html);
     }
 }
-

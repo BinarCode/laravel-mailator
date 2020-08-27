@@ -24,6 +24,7 @@ trait ReplaceModelAttributes
 
             $replace = $parts->reduce(function ($value, $part) {
                 $part = Str::between($part, '::', '::');
+
                 return $value->$part
                     ?? $value[$part]
                     ?? '';
