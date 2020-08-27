@@ -6,5 +6,5 @@ coverage
 output
 docs/node_modules
 docs/.vuepress/dist
-.php_cs.cache1
+.php_cs.cache
 .phpunit.result.cache
