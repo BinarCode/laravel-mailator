@@ -56,5 +56,34 @@ class CreateMailatorTables extends Migration
                 ->references('id')
                 ->on(config('mailator.schedulers_table_name', 'mailator_schedulers'));
         });
+
+        Schema::create('mail_templates', function (Blueprint $table) {
+            $table->id();
+            $table->uuid('uuid');
+
+            $table->string('name')->nullable();
+            $table->string('from_email')->nullable();
+            $table->string('from_name')->nullable();
+            $table->string('subject')->nullable();
+
+            $table->longText('html')->nullable();
+            $table->longText('email_html')->nullable();
+            $table->longText('webview_html')->nullable();
+
+            $table->string('mailable_class')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('mail_template_placeholders', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('mail_template_id')->constrained('mail_templates')->cascadeOnDelete();
+            $table->string('name');
+            $table->string('description');
+            $table->json('meta')->nullable();
+            $table->timestamps();
+
+            /** * Indexes */
+            $table->index('mail_template_id');
+        });
     }
 }
