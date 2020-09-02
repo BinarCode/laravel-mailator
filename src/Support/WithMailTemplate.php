@@ -3,7 +3,6 @@
 namespace Binarcode\LaravelMailator\Support;
 
 use Binarcode\LaravelMailator\Actions\PersonalizeMailAction;
-use Binarcode\LaravelMailator\Exceptions\InvalidTemplateException;
 use Binarcode\LaravelMailator\Models\MailTemplateable;
 
 trait WithMailTemplate
@@ -40,7 +39,8 @@ trait WithMailTemplate
 
         if ($from = $template->getFromEmail()) {
             $this->from(
-                $from, $template->getFromName()
+                $from,
+                $template->getFromName()
             );
         }
 
@@ -78,7 +78,7 @@ trait WithMailTemplate
 
     protected function ensureValidView()
     {
-        if (!$this->markdown) {
+        if (! $this->markdown) {
             $this->markdown($this->getLayout());
         }
 
@@ -87,7 +87,7 @@ trait WithMailTemplate
 
     protected function ensureValidSlot()
     {
-        if (!$this->slot) {
+        if (! $this->slot) {
             $this->slot = $this->template->getContent() ?? '';
         }
 
