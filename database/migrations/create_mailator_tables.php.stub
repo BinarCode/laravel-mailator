@@ -40,7 +40,7 @@ class CreateMailatorTables extends Migration
             $table->bigIncrements('id');
             $table->string('name')->nullable();
             $table->json('recipients')->nullable();
-            $table->unsignedInteger('mailator_schedule_id')->nullable();
+            $table->foreignId('mailator_schedule_id')->nullable();
             $table->enum('status', [
                 MailatorLog::STATUS_FAILED,
                 MailatorLog::STATUS_SENT,

@@ -32,9 +32,19 @@ return [
 
     'templates' => [
         /**
+         * > The base model for the mail templates.
+         */
+        'template_model' => Binarcode\LaravelMailator\Models\MailTemplate::class,
+
+        /**
+         * > The base model for the mail template placeholders.
+         */
+        'placeholder_model' => Binarcode\LaravelMailator\Models\MailTemplatePlaceholder::class,
+
+        /**
          > The email layout, used to wrap the template.
          */
-        'laravel-mailator::mails.template_layout' => 'laravel-mailator::mails.template_layout',
+        'template_layout' => 'laravel-mailator::mails.laravel',
 
         /**
         > The default list with replacers for the template.

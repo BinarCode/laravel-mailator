@@ -10,6 +10,8 @@ trait WithMailTemplate
 {
     public $template;
 
+    public $slot;
+
     protected $layout;
 
     /**
@@ -20,7 +22,27 @@ trait WithMailTemplate
      */
     public function template(MailTemplateable $template)
     {
+        $this->ensureValidView();
+
         $this->template = $template;
+
+        /** * @var PersonalizeMailAction $replacerAction */
+        $replacerAction = app(PersonalizeMailAction::class);
+
+        // replace placehlders
+        $this->slot = $replacerAction->execute(
+            $template->getContent(),
+            $this->getTemplate(),
+            $this->getReplacers(),
+        );
+
+        $this->subject($template->getSubject());
+
+        if ($from = $template->getFromEmail()) {
+            $this->from(
+                $from, $template->getFromName()
+            );
+        }
 
         return $this;
     }
@@ -40,7 +62,7 @@ trait WithMailTemplate
 
     public function getLayout()
     {
-        return $this->layout ?? config('mailator.templates.layout', 'laravel-mailator::mails.template_layout');
+        return $this->layout ?? config('mailator.templates.layout', 'laravel-mailator::mails.laravel');
     }
 
     public function getTemplate(): ?MailTemplateable
@@ -54,31 +76,19 @@ trait WithMailTemplate
      */
     abstract public function getReplacers(): array;
 
-    public function render()
+    protected function ensureValidView()
     {
-        $this->ensureValidView();
-
-        // this will call the build method
-        $rendered = parent::render();
-
-        if (! $this->getTemplate()) {
-            InvalidTemplateException::throw(get_class($this->getTemplate()));
+        if (!$this->markdown) {
+            $this->markdown($this->getLayout());
         }
 
-        /** * @var PersonalizeMailAction $replacerAction */
-        $replacerAction = app(PersonalizeMailAction::class);
-
-        return $replacerAction->execute(
-            $rendered,
-            $this->getTemplate(),
-            $this->getReplacers(),
-        );
+        return $this;
     }
 
-    private function ensureValidView()
+    protected function ensureValidSlot()
     {
-        if (! $this->markdown) {
-            $this->markdown($this->getLayout());
+        if (!$this->slot) {
+            $this->slot = $this->template->getContent() ?? '';
         }
 
         return $this;

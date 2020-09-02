@@ -6,7 +6,7 @@ use Binarcode\LaravelMailator\Models\MailTemplateable;
 use Binarcode\LaravelMailator\Replacers\Concerns\ReplaceModelAttributes;
 use Illuminate\Database\Eloquent\Model;
 
-class PlaceholdersReplacer implements Replacer
+class ModelAttributesReplacer implements Replacer
 {
     use ReplaceModelAttributes;
 
