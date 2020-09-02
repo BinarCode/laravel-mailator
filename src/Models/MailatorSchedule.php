@@ -222,7 +222,7 @@ class MailatorSchedule extends Model
     public static function run()
     {
         static::query()
-            ->cursor()
+            ->get()->lazy()
             ->filter(fn (self $schedule) => $schedule->shouldSend())
             ->each(fn (self $schedule) => dispatch(new SendMailJob($schedule)));
     }
