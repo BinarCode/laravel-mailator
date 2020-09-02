@@ -51,7 +51,7 @@ class LaravelMailatorServiceProvider extends ServiceProvider
             }
             // Publishing the views.
             $this->publishes([
-                __DIR__.'/../resources/views' => resource_path('views/vendor/laravel-mailator'),
+                __DIR__.'/../resources/views/publish' => resource_path('views/vendor/laravel-mailator'),
             ], 'mailator-views');
 
             // Publishing assets.

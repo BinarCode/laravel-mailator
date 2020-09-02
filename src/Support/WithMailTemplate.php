@@ -62,7 +62,7 @@ trait WithMailTemplate
 
     public function getLayout()
     {
-        return $this->layout ?? config('mailator.templates.layout', 'laravel-mailator::mails.laravel');
+        return $this->layout ?? config('mailator.templates.template_layout', 'laravel-mailator::laravel');
     }
 
     public function getTemplate(): ?MailTemplateable

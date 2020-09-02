@@ -44,7 +44,7 @@ return [
         /**
          > The email layout, used to wrap the template.
          */
-        'template_layout' => 'laravel-mailator::mails.laravel',
+        'template_layout' => 'laravel-mailator::laravel',
 
         /**
         > The default list with replacers for the template.
