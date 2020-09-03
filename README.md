@@ -1,7 +1,8 @@
 <p align="center"><img src="https://github.com/BinarCode/laravel-mailator/blob/master/docs/logo.png"></p>
 
 <p align="center">
-    <a href="https://packagist.org/packages/BinarCode/larave-mailator"><img src="https://poser.pugx.org/BinarCode/larave-mailator/license.svg" alt="License"></a>
+    [![Latest Stable Version](https://poser.pugx.org/binarcode/laravel-mailator/v)](//packagist.org/packages/binarcode/laravel-mailator)
+    [![License](https://poser.pugx.org/binarcode/laravel-mailator/license)](//packagist.org/packages/binarcode/laravel-mailator)
 </p>
 
 Laravel Mailator provides a featherweight system for configure email scheduler and email templates based on application events.
