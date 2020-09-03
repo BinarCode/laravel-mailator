@@ -1,9 +1,6 @@
 <p align="center"><img src="https://github.com/BinarCode/laravel-mailator/blob/master/docs/logo.png"></p>
 
 <p align="center">
-    <a href="https://travis-ci.org/BinarCode/larave-mailator"><img src="https://travis-ci.org/BinarCode/larave-mailator.svg" alt="Build Status"></a>
-    <a href="https://scrutinizer-ci.com/g/BinarCode/laravel-mailator"><img src="https://scrutinizer-ci.com/g/BinarCode/laravel-mailator/badges/quality-score.png?b=master" alt="Quality"></a>
-    <a href="https://scrutinizer-ci.com/g/BinarCode/laravel-mailator"><img src="https://scrutinizer-ci.com/g/BinarCode/laravel-mailator/badges/build.png?b=master" alt="Test Coverage"></a>
     <a href="https://packagist.org/packages/BinarCode/larave-mailator"><img src="https://poser.pugx.org/BinarCode/larave-mailator/license.svg" alt="License"></a>
 </p>
 
