@@ -1,10 +1,11 @@
 <p align="center"><img src="https://github.com/BinarCode/laravel-mailator/blob/master/docs/logo.png"></p>
 
 <p align="center">
-<a href="https://github.com/binarcode/laravel-mailator/actions"><img src="https://github.com/binarcode/laravel-mailator/workflows/Tests/badge.svg" alt="Tests"></a>
-    [![Latest Stable Version](https://poser.pugx.org/binarcode/laravel-mailator/v)](//packagist.org/packages/binarcode/laravel-mailator)
-    [![License](https://poser.pugx.org/binarcode/laravel-mailator/license)](//packagist.org/packages/binarcode/laravel-mailator)
-    [![Tests](https://poser.pugx.org/binarcode/laravel-mailator/license)](//packagist.org/packages/binarcode/laravel-mailator)
+
+[![Latest Stable Version](https://github.com/binarcode/laravel-mailator/workflows/Tests/badge.svg)](//github.com/binarcode/laravel-mailator)
+[![Latest Stable Version](https://poser.pugx.org/binarcode/laravel-mailator/v)](//packagist.org/packages/binarcode/laravel-mailator)
+[![License](https://poser.pugx.org/binarcode/laravel-mailator/license)](//packagist.org/packages/binarcode/laravel-mailator)
+[![Tests](https://poser.pugx.org/binarcode/laravel-mailator/license)](//packagist.org/packages/binarcode/laravel-mailator)
     
 </p>
 
