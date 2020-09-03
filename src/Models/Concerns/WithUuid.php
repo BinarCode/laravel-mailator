@@ -12,7 +12,7 @@ trait WithUuid
     {
         static::creating(function (Model $model) {
             if (! $model->uuid) {
-                $model->setAttribute('uuid', Str::orderedUuid());
+                $model->setAttribute('uuid', Str::uuid());
             }
         });
     }

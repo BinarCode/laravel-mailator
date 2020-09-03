@@ -67,4 +67,19 @@ class MailTemplate extends Model implements MailTemplateable
     {
         return $this->html;
     }
+
+    public function getSubject(): ?string
+    {
+        return $this->subject;
+    }
+
+    public function getFromEmail(): ?string
+    {
+        return $this->from_email;
+    }
+
+    public function getFromName(): ?string
+    {
+        return $this->from_name;
+    }
 }

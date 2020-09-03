@@ -3,7 +3,7 @@
 namespace Binarcode\LaravelMailator\Tests\Fixtures;
 
 use Binarcode\LaravelMailator\Models\MailTemplate;
-use Binarcode\LaravelMailator\Replacers\PlaceholdersReplacer;
+use Binarcode\LaravelMailator\Replacers\ModelAttributesReplacer;
 use Binarcode\LaravelMailator\Support\WithMailTemplate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Database\Eloquent\Model;
@@ -32,7 +32,7 @@ class WelcomeMailatorMailable extends Mailable
     public function getReplacers(): array
     {
         return [
-            PlaceholdersReplacer::makeWithModel($this->user),
+            ModelAttributesReplacer::makeWithModel($this->user),
         ];
     }
 }

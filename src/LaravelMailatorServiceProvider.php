@@ -4,6 +4,8 @@ namespace Binarcode\LaravelMailator;
 
 use Binarcode\LaravelMailator\Models\MailatorLog;
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
+use Binarcode\LaravelMailator\Models\MailTemplate;
+use Binarcode\LaravelMailator\Models\MailTemplatePlaceholder;
 use Illuminate\Support\ServiceProvider;
 
 class LaravelMailatorServiceProvider extends ServiceProvider
@@ -21,11 +23,19 @@ class LaravelMailatorServiceProvider extends ServiceProvider
             $this->app->bind(MailatorLog::class, config('mailator.log_model'));
         }
 
+        if (config('mailator.templates.template_model')) {
+            $this->app->bind(MailTemplate::class, config('mailator.templates.template_model'));
+        }
+
+        if (config('mailator.templates.placeholder_model')) {
+            $this->app->bind(MailTemplatePlaceholder::class, config('mailator.templates.placeholder_model'));
+        }
+
         /*
          * Optional methods to load your package assets
          */
         // $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'laravel-mailator');
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'laravel-mailator');
+        $this->loadViewsFrom(__DIR__.'/../resources/views/publish', 'laravel-mailator');
         // $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         // $this->loadRoutesFrom(__DIR__.'/routes.php');
 
@@ -40,9 +50,9 @@ class LaravelMailatorServiceProvider extends ServiceProvider
                 ], 'mailator-migrations');
             }
             // Publishing the views.
-            /*$this->publishes([
-                __DIR__.'/../resources/views' => resource_path('views/vendor/laravel-mailator'),
-            ], 'views');*/
+            $this->publishes([
+                __DIR__.'/../resources/views/publish' => resource_path('views/vendor/laravel-mailator'),
+            ], 'mailator-views');
 
             // Publishing assets.
             /*$this->publishes([

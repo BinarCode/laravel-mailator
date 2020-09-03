@@ -27,7 +27,7 @@ class MailatorScheduleTest extends TestCase
             })
             ->save();
 
-        $this->assertDatabaseCount('mailator_schedulers', 1);
+        $this->assertCount(1, MailatorSchedule::all());
     }
 
     public function test_sending_email_only_once()

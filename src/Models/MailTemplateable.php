@@ -13,4 +13,10 @@ interface MailTemplateable
     public function preparePlaceholders(): Collection;
 
     public function getContent(): string;
+
+    public function getSubject(): ?string;
+
+    public function getFromEmail(): ?string;
+
+    public function getFromName(): ?string;
 }
