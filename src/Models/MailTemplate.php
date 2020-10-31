@@ -38,7 +38,9 @@ class MailTemplate extends Model implements MailTemplateable
 
     public function placeholders()
     {
-        return $this->hasMany(MailTemplatePlaceholder::class, 'mail_template_id');
+        return $this->hasMany(
+            config('mailator.templates.placeholder_model') ?? MailTemplatePlaceholder::class, 'mail_template_id'
+        );
     }
 
     public function htmlWithInlinedCss(): string
