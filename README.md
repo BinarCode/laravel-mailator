@@ -16,6 +16,12 @@ You can install the package via composer:
 composer require binarcode/laravel-mailator
 ```
 
+## Publish
+
+Publish migrations: `a vendor:publish --tag=mailator-migrations`
+
+Publish config: `a vendor:publish --tag=mailator-config`
+
 ## Usage
 
 It has mainly 2 directions of usage:
