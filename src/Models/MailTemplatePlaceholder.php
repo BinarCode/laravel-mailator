@@ -23,7 +23,8 @@ class MailTemplatePlaceholder extends Model
     public function mailTemplate()
     {
         return $this->belongsTo(
-            config('mailator.templates.template_model') ?? MailTemplate::class, 'mail_template_id'
+            config('mailator.templates.template_model') ?? MailTemplate::class,
+            'mail_template_id'
         );
     }
 }

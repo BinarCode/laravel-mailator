@@ -3,7 +3,6 @@
 
 namespace Binarcode\LaravelMailator\Models\Concerns;
 
-
 use Binarcode\LaravelMailator\Constraints\BeforeConstraint;
 use Binarcode\LaravelMailator\Constraints\SendScheduleConstraint;
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
@@ -18,9 +17,9 @@ trait ConstraintsResolver
     public function configurationsPasses(): bool
     {
         return collect([
-            BeforeConstraint::class
+            BeforeConstraint::class,
         ])
-            ->map(fn($class) => app($class))
+            ->map(fn ($class) => app($class))
             ->every(fn (SendScheduleConstraint $event) => $event->canSend($this, $this->logs));
     }
 

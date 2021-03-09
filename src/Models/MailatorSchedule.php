@@ -324,7 +324,7 @@ class MailatorSchedule extends Model
 
     protected function ensureValidEmail(string $email): bool
     {
-        return !Validator::make(
+        return ! Validator::make(
             compact('email'),
             ['email' => 'required|email']
         )->fails();

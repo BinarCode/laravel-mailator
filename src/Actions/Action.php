@@ -2,7 +2,6 @@
 
 namespace Binarcode\LaravelMailator\Actions;
 
-
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
 
 interface Action
