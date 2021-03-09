@@ -5,6 +5,7 @@ namespace Binarcode\LaravelMailator\Models;
 use Binarcode\LaravelMailator\Actions\Action;
 use Binarcode\LaravelMailator\Actions\SendMailAction;
 use Binarcode\LaravelMailator\Constraints\SendScheduleConstraint;
+use Binarcode\LaravelMailator\Exceptions\InstanceException;
 use Binarcode\LaravelMailator\Jobs\SendMailJob;
 use Binarcode\LaravelMailator\Models\Concerns\ConstraintsResolver;
 use Carbon\Carbon;
@@ -27,6 +28,7 @@ use Opis\Closure\SerializableClosure;
  * @property array constraints
  * @property Carbon timestamp_target
  * @property array recipients
+ * @property string action
  * @property Closure when
  * @property string frequency_option
  */
@@ -66,6 +68,7 @@ class MailatorSchedule extends Model
     const FREQUENCY_OPTIONS_WEEKLY = 'weekly';
 
     protected $fillable = [
+        'action',
         'recipients',
         'mailable_class',
         'delay_minutes',
@@ -91,15 +94,6 @@ class MailatorSchedule extends Model
         'start_at',
         'end_at',
     ];
-
-    public Action $action;
-
-    public function __construct(array $attributes = [])
-    {
-        parent::__construct($attributes);
-
-        $this->action = app(Config::get('mailator.scheduler.send_mail_action', SendMailAction::class));
-    }
 
     public static function init(string $name): self
     {
@@ -272,7 +266,19 @@ class MailatorSchedule extends Model
         static::query()
             ->get()->lazy()
             ->filter(fn (self $schedule) => $schedule->shouldSend())
+            ->filter(fn (self $schedule) => $schedule->hasCustomAction())
+            ->each(fn (self $schedule) => app($schedule->action)->handle($schedule));
+
+        static::query()
+            ->get()->lazy()
+            ->filter(fn (self $schedule) => $schedule->shouldSend())
+            ->filter(fn (self $schedule) => !$schedule->hasCustomAction())
             ->each(fn (self $schedule) => dispatch(new SendMailJob($schedule)));
+    }
+
+    public function hasCustomAction(): bool
+    {
+        return !is_null($this->action) && is_subclass_of($this->action, Action::class);
     }
 
     public function getMailable(): Mailable
@@ -330,8 +336,12 @@ class MailatorSchedule extends Model
         )->fails();
     }
 
-    public function action(Action $action): self
+    public function actionClass(string $action): self
     {
+        if (!is_subclass_of($action, Action::class))  {
+            throw InstanceException::throw(Action::class);
+        }
+
         $this->action = $action;
 
         return $this;

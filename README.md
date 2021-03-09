@@ -6,7 +6,8 @@
 <a href="https://packagist.org/packages/binarcode/laravel-mailator"><img src="https://poser.pugx.org/binarcode/laravel-mailator/license" alt="License"></a>
 </p>
 
-Laravel Mailator provides a featherweight system for configure email scheduler and email templates based on application events.
+Laravel Mailator provides a featherweight system for configure email scheduler and email templates based on application
+events.
 
 ## Installation
 
@@ -29,7 +30,6 @@ It has mainly 2 directions of usage:
 1. Email Templates & Placeholders
 
 2. Email Scheduler
-
 
 ## Templating
 
@@ -58,11 +58,14 @@ $template->placeholders()->create(
 
 To use the template, you simply have to add the `WithMailTemplate` trait to your mailable.
 
-This will enforce you to implement the `getReplacers` method, this should return an array of replacers to your template. The array may contain instances of `Binarcode\LaravelMailator\Replacers\Replacer` or even `Closure` instances.  
+This will enforce you to implement the `getReplacers` method, this should return an array of replacers to your template.
+The array may contain instances of `Binarcode\LaravelMailator\Replacers\Replacer` or even `Closure` instances.
 
-Mailator shipes with a builtin replacer `ModelAttributesReplacer`, it will automaticaly replace attributes from the model you provide to placeholders.
+Mailator shipes with a builtin replacer `ModelAttributesReplacer`, it will automaticaly replace attributes from the
+model you provide to placeholders.
 
-The last step is how to say to your mailable what template to use. This could be done into the build method as shown bellow:
+The last step is how to say to your mailable what template to use. This could be done into the build method as shown
+bellow:
 
 ```php
 class WelcomeMailatorMailable extends Mailable
@@ -94,10 +97,9 @@ class WelcomeMailatorMailable extends Mailable
 }
 ```
 
-
 ## Scheduler
 
-To setup a mail to be sent after or before an event, you can do this by using `MailatorSchedule`. 
+To setup a mail to be sent after or before an event, you can do this by using `MailatorSchedule`.
 
 Firstly lets setup a mail scheduler:
 
@@ -116,7 +118,8 @@ Binarcode\LaravelMailator\Models\MailatorSchedule::init('Invoice reminder.')
     ->save();
 ```
 
-The `constraint` mutator accept an instance of `Binarcode\LaravelMailator\Constraints\SendScheduleConstraint`, based on this the Mailator will decide to send or to not send the email.
+The `constraint` mutator accept an instance of `Binarcode\LaravelMailator\Constraints\SendScheduleConstraint`, based on
+this the Mailator will decide to send or to not send the email.
 
 Let's assume we have this `BeforeInvoiceExpiresConstraint` constraint:
 
@@ -139,6 +142,16 @@ Binarcode\LaravelMailator\Models\MailatorSchedule::run();
 
 The Mailator will take care of all your mails that needs to be sent, and it will send them.
 
+Using `Scheduler` you can even define your custom action:
+
+```php
+$scheduler = MailatorSchedule::init('Invoice reminder.')
+    ->recipients([ 'zoo@bar.com'])
+    ->before(now()->addWeek())
+    ->actionClass(CustomAction::class)
+    ->save();
+```
+
 ### Testing
 
 ``` bash
@@ -155,7 +168,8 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ### Security
 
-If you discover any security related issues, please email eduard.lupacescu@binarcode.com instead of using the issue tracker.
+If you discover any security related issues, please email eduard.lupacescu@binarcode.com instead of using the issue
+tracker.
 
 ## Credits
 
