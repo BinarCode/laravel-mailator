@@ -18,8 +18,8 @@ return [
         'model' => Binarcode\LaravelMailator\Models\MailatorSchedule::class,
 
         /**
-        > The queue used for sending emails.
-         */
+        * > The queue used for sending emails.
+        */
         'send_mail_job_queue' => 'default',
 
         /**

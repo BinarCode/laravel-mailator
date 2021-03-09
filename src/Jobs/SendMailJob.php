@@ -32,7 +32,7 @@ class SendMailJob implements ShouldQueue
     public function handle()
     {
         /** * @var SendMailAction $sendMailAction */
-        $sendMailAction = app(Config::get('mailator.scheduler.send_mail_action', SendMailAction::class));
+        $sendMailAction = $this->schedule->action;
 
         $sendMailAction->handle($this->schedule);
     }

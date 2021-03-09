@@ -102,20 +102,21 @@ To setup a mail to be sent after or before an event, you can do this by using `M
 Firstly lets setup a mail scheduler:
 
 ```php
-use Binarcode\LaravelMailator\Tests\Fixtures\InvoiceReminderMailable;
+use Binarcode\LaravelMailator\Tests\Fixtures\InvoiceReminderMailable;use Binarcode\LaravelMailator\Tests\Fixtures\SerializedConditionCondition;
 
 Binarcode\LaravelMailator\Models\MailatorSchedule::init('Invoice reminder.')
     ->mailable(new InvoiceReminderMailable())
     ->recipients(['baz@binarcode.com'])
     ->days(1)
-    ->before(BeforeInvoiceExpiresConstraint::class)
+    ->constraint(new SerializedConditionCondition)
+    ->before(now()->addYear())
     ->when(function () {
         return 'Working.';
     })
     ->save();
 ```
 
-The `before` mutator accept an instance of `Binarcode\LaravelMailator\Constraints\SendScheduleConstraint`, based on this the Mailator will decide to send or to not send the email.
+The `constraint` mutator accept an instance of `Binarcode\LaravelMailator\Constraints\SendScheduleConstraint`, based on this the Mailator will decide to send or to not send the email.
 
 Let's assume we have this `BeforeInvoiceExpiresConstraint` constraint:
 

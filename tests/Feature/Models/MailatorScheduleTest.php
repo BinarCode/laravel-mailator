@@ -3,11 +3,13 @@
 namespace Binarcode\LaravelMailator\Tests\Feature\Models;
 
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
-use Binarcode\LaravelMailator\Tests\Fixtures\BeforeInvoiceExpiresConstraint;
 use Binarcode\LaravelMailator\Tests\Fixtures\InvoiceReminderMailable;
+use Binarcode\LaravelMailator\Tests\Fixtures\SerializedConditionCondition;
 use Binarcode\LaravelMailator\Tests\Fixtures\SingleSendingCondition;
+use Binarcode\LaravelMailator\Tests\Fixtures\User;
 use Binarcode\LaravelMailator\Tests\TestCase;
 use Illuminate\Support\Facades\Mail;
+use Spatie\TestTime\TestTime;
 
 class MailatorScheduleTest extends TestCase
 {
@@ -21,7 +23,7 @@ class MailatorScheduleTest extends TestCase
         MailatorSchedule::init('Invoice reminder.')
             ->mailable(new InvoiceReminderMailable())
             ->days(1)
-            ->before(BeforeInvoiceExpiresConstraint::class)
+            ->before(now()->addWeek())
             ->when(function () {
                 return 'Working.';
             })
@@ -43,9 +45,7 @@ class MailatorScheduleTest extends TestCase
                 (new InvoiceReminderMailable())->to('foo@bar.com')
             )
             ->days(1)
-            ->before(
-                SingleSendingCondition::class,
-            )
+            ->constraint(new SingleSendingCondition)
             ->save();
 
         $_SERVER['can_send'] = true;
@@ -60,8 +60,64 @@ class MailatorScheduleTest extends TestCase
         MailatorSchedule::run();
         Mail::assertSent(InvoiceReminderMailable::class, 1);
 
-        Mail::assertSent(InvoiceReminderMailable::class, function (InvoiceReminderMailable  $mail) {
+        Mail::assertSent(InvoiceReminderMailable::class, function (InvoiceReminderMailable $mail) {
             return $mail->hasTo('foo@bar.com') && $mail->hasTo('zoo@bar.com');
         });
+    }
+
+    public function test_can_send_serialized_constrained()
+    {
+        Mail::fake();
+        Mail::assertNothingSent();
+
+        $scheduler = MailatorSchedule::init('Invoice reminder.')
+            ->recipients([
+                'zoo@bar.com',
+            ])
+            ->mailable(
+                (new InvoiceReminderMailable())->to('foo@bar.com')
+            )
+            ->days(1)
+            ->constraint(
+                new SerializedConditionCondition(new User([
+                    'email' => 'john.doe@binarcode.com',
+                ]))
+            )
+            ->before();
+
+        $scheduler->save();
+
+        MailatorSchedule::run();
+        MailatorSchedule::run();
+
+        Mail::assertSent(InvoiceReminderMailable::class, 2);
+    }
+
+    public function test_can_use_carbon_target_date()
+    {
+        TestTime::freeze();
+
+        Mail::fake();
+        Mail::assertNothingSent();
+
+        $scheduler = MailatorSchedule::init('Invoice reminder.')
+            ->recipients([
+                'zoo@bar.com',
+            ])
+            ->mailable(
+                (new InvoiceReminderMailable())->to('foo@bar.com')
+            )
+            ->days(1)
+            ->before(now()->addDays(7));
+
+        $scheduler->save();
+
+        MailatorSchedule::run();
+        Mail::assertNothingSent();
+
+        TestTime::addDays(6);
+        MailatorSchedule::run();
+
+        Mail::assertSent(InvoiceReminderMailable::class, 1);
     }
 }
