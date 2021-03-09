@@ -10,7 +10,7 @@ class WeeklyConstraint implements SendScheduleConstraint
 {
     public function canSend(MailatorSchedule $schedule, Collection $logs): bool
     {
-        if (!$schedule->isWeekly()) {
+        if (! $schedule->isWeekly()) {
             return true;
         }
 

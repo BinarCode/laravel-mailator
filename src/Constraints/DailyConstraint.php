@@ -10,7 +10,7 @@ class DailyConstraint implements SendScheduleConstraint
 {
     public function canSend(MailatorSchedule $schedule, Collection $logs): bool
     {
-        if (!$schedule->isDaily()) {
+        if (! $schedule->isDaily()) {
             return true;
         }
 
