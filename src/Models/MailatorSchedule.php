@@ -2,13 +2,18 @@
 
 namespace Binarcode\LaravelMailator\Models;
 
+use Binarcode\LaravelMailator\Actions\Action;
+use Binarcode\LaravelMailator\Actions\SendMailAction;
 use Binarcode\LaravelMailator\Constraints\SendScheduleConstraint;
-use Binarcode\LaravelMailator\Exceptions\InstanceException;
 use Binarcode\LaravelMailator\Jobs\SendMailJob;
+use Binarcode\LaravelMailator\Models\Concerns\ConstraintsResolver;
+use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Closure;
 use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Opis\Closure\SerializableClosure;
@@ -18,15 +23,17 @@ use Opis\Closure\SerializableClosure;
  *
  * @property string mailable_class
  * @property string delay_minutes
- * @property string delay_option
  * @property string time_frame_origin
- * @property array events
+ * @property array constraints
+ * @property Carbon timestamp_target
  * @property array recipients
  * @property Closure when
  * @property string frequency_option
  */
 class MailatorSchedule extends Model
 {
+    use ConstraintsResolver;
+
     public function getTable()
     {
         return config('mailator.schedulers_table_name', 'mailator_schedulers');
@@ -62,9 +69,9 @@ class MailatorSchedule extends Model
         'recipients',
         'mailable_class',
         'delay_minutes',
-        'delay_option',
         'time_frame_origin',
-        'events',
+        'timestamp_target',
+        'constraints',
         'when',
         'frequency_option',
         'last_sent_at',
@@ -73,8 +80,9 @@ class MailatorSchedule extends Model
     ];
 
     protected $casts = [
-        'events' => 'array',
+        'constraints' => 'array',
         'recipients' => 'array',
+        'timestamp_target' => 'datetime',
     ];
 
     protected $dates = [
@@ -84,26 +92,35 @@ class MailatorSchedule extends Model
         'end_at',
     ];
 
+    public Action $action;
+
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+
+        $this->action = app(Config::get('mailator.scheduler.send_mail_action', SendMailAction::class));
+    }
+
     public static function init(string $name): self
     {
         return new static(['name' => $name]);
     }
 
-    public function mailable(Mailable $mailable)
+    public function mailable(Mailable $mailable): self
     {
         $this->mailable_class = serialize($mailable);
 
         return $this;
     }
 
-    public function once()
+    public function once(): self
     {
         $this->frequency_option = static::FREQUENCY_OPTIONS_ONCE;
 
         return $this;
     }
 
-    public function hourly()
+    public function hourly(): self
     {
         $this->frequency_option = static::FREQUENCY_OPTIONS_HOURLY;
 
@@ -124,43 +141,82 @@ class MailatorSchedule extends Model
         return $this;
     }
 
-    public function after(string $event = null)
+    public function after(SendScheduleConstraint $date = null): self
     {
         $this->time_frame_origin = static::TIME_FRAME_ORIGIN_AFTER;
 
-        if ($event) {
-            $this->event($event);
+        if ($date) {
+            $this->timestamp_target = $date;
         }
 
         return $this;
     }
 
-    public function before(string $event = null)
+    public function contrained(SendScheduleConstraint $constraint): self
+    {
+        $this->constraint($constraint);
+
+        return $this;
+    }
+
+    public function before(CarbonInterface $date = null): self
     {
         $this->time_frame_origin = static::TIME_FRAME_ORIGIN_BEFORE;
 
-        if ($event) {
-            $this->event($event);
+        if ($date) {
+            $this->timestamp_target = $date;
         }
 
         return $this;
     }
 
-    public function minutes(int $number)
+    public function isDaily(): bool
+    {
+        return $this->frequency_option === static::FREQUENCY_OPTIONS_DAILY;
+    }
+
+    public function isWeekly(): bool
+    {
+        return $this->frequency_option === static::FREQUENCY_OPTIONS_WEEKLY;
+    }
+
+    public function isAfter(): bool
+    {
+        return $this->time_frame_origin === static::TIME_FRAME_ORIGIN_AFTER;
+    }
+
+    public function isBefore(): bool
+    {
+        return $this->time_frame_origin === static::TIME_FRAME_ORIGIN_BEFORE;
+    }
+
+    public function isOnce(): bool
+    {
+        return $this->frequency_option === static::FREQUENCY_OPTIONS_ONCE;
+    }
+
+    public function toDays(): int
+    {
+        //let's say we have 1 day and 2 hours till day job ends
+        //so we will floor it to 1, and will send the reminder in time
+        return floor($this->delay_minutes / static::MINUTES_IN_DAY);
+    }
+
+    public function minutes(int $number): self
     {
         $this->delay_minutes = $number;
 
         return $this;
     }
 
-    public function hours(int $number)
+    public function hours(int $number): self
     {
         $this->delay_minutes = $number * static::MINUTES_IN_HOUR;
 
         return $this;
     }
 
-    public function days(int $number)
+    public function days(int $number): self
     {
         $this->delay_minutes = $number * static::MINUTES_IN_DAY;
 
@@ -174,14 +230,9 @@ class MailatorSchedule extends Model
         return $this;
     }
 
-    public function event(string $event)
+    public function constraint(SendScheduleConstraint $constraint): self
     {
-        if (! is_a(SendScheduleConstraint::class, $event)) {
-            InstanceException::throw($event);
-        }
-
-        $this->events = Arr::wrap($this->events) + [$event];
-
+        $this->constraints = array_merge(Arr::wrap($this->constraints), [serialize($constraint)]);
 
         return $this;
     }
@@ -195,7 +246,7 @@ class MailatorSchedule extends Model
         return $this;
     }
 
-    public function when(Closure $closure)
+    public function when(Closure $closure): self
     {
         $this->when = serialize(
             new SerializableClosure($closure)
@@ -209,14 +260,11 @@ class MailatorSchedule extends Model
         return $this->hasMany(MailatorLog::class, 'mailator_schedule_id');
     }
 
-    public function shouldSend()
+    public function shouldSend(): bool
     {
         $this->load('logs');
 
-        return collect($this->events)
-            ->map(fn ($event) => app($event))
-            ->filter(fn ($event) => is_subclass_of($event, SendScheduleConstraint::class))
-            ->every(fn (SendScheduleConstraint $event) => $event->canSend($this, $this->logs));
+        return $this->configurationsPasses() && $this->whenPasses() && $this->eventsPasses();
     }
 
     public static function run()
@@ -252,12 +300,12 @@ class MailatorSchedule extends Model
     public function markAsFailed(string $failureReason): self
     {
         $this->logs()->create([
-                'status' => MailatorLog::STATUS_FAILED,
-                'action_at' => now(),
-                'created_at' => now(),
-                'updated_at' => now(),
-                'exception' => $failureReason,
-            ]);
+            'status' => MailatorLog::STATUS_FAILED,
+            'action_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+            'exception' => $failureReason,
+        ]);
 
         $this->update([
             'last_failed_at' => now(),
@@ -276,9 +324,16 @@ class MailatorSchedule extends Model
 
     protected function ensureValidEmail(string $email): bool
     {
-        return ! Validator::make(
+        return !Validator::make(
             compact('email'),
             ['email' => 'required|email']
         )->fails();
+    }
+
+    public function action(Action $action): self
+    {
+        $this->action = $action;
+
+        return $this;
     }
 }

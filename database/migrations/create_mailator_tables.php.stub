@@ -20,7 +20,8 @@ class CreateMailatorTables extends Migration
                 MailatorSchedule::TIME_FRAME_ORIGIN_BEFORE,
                 MailatorSchedule::TIME_FRAME_ORIGIN_AFTER,
             ])->nullable()->comment('Before or after event.');
-            $table->json('events')->nullable()->comment('Offset target.');
+            $table->timestamp('timestamp_target')->nullable();
+            $table->json('constraints')->nullable()->comment('Offset target.');
             $table->json('recipients')->nullable();
             $table->text('when')->nullable();
             $table->enum('frequency_option', [

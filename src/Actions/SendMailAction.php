@@ -7,7 +7,7 @@ use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use Exception;
 use Illuminate\Support\Facades\Mail;
 
-class SendMailAction
+class SendMailAction implements Action
 {
     public function handle(MailatorSchedule $schedule)
     {
