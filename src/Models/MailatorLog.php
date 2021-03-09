@@ -2,8 +2,14 @@
 
 namespace Binarcode\LaravelMailator\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class MailatorLog
+ * @property Carbon $created_at
+ * @package Binarcode\LaravelMailator\Models
+ */
 class MailatorLog extends Model
 {
     public function getTable()
@@ -31,4 +37,9 @@ class MailatorLog extends Model
         'updated_at' => 'datetime',
         'recipients' => 'array',
     ];
+
+    public function isSent(): bool
+    {
+        return $this->status === static::STATUS_SENT;
+    }
 }
