@@ -3,7 +3,6 @@
 namespace Binarcode\LaravelMailator\Models;
 
 use Binarcode\LaravelMailator\Actions\Action;
-use Binarcode\LaravelMailator\Actions\SendMailAction;
 use Binarcode\LaravelMailator\Constraints\SendScheduleConstraint;
 use Binarcode\LaravelMailator\Exceptions\InstanceException;
 use Binarcode\LaravelMailator\Jobs\SendMailJob;
@@ -272,13 +271,13 @@ class MailatorSchedule extends Model
         static::query()
             ->get()->lazy()
             ->filter(fn (self $schedule) => $schedule->shouldSend())
-            ->filter(fn (self $schedule) => !$schedule->hasCustomAction())
+            ->filter(fn (self $schedule) => ! $schedule->hasCustomAction())
             ->each(fn (self $schedule) => dispatch(new SendMailJob($schedule)));
     }
 
     public function hasCustomAction(): bool
     {
-        return !is_null($this->action) && is_subclass_of($this->action, Action::class);
+        return ! is_null($this->action) && is_subclass_of($this->action, Action::class);
     }
 
     public function getMailable(): Mailable
@@ -338,7 +337,7 @@ class MailatorSchedule extends Model
 
     public function actionClass(string $action): self
     {
-        if (!is_subclass_of($action, Action::class))  {
+        if (! is_subclass_of($action, Action::class)) {
             throw InstanceException::throw(Action::class);
         }
 

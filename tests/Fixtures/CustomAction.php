@@ -9,6 +9,5 @@ class CustomAction implements Action
 {
     public function handle(MailatorSchedule $schedule)
     {
-
     }
 }
