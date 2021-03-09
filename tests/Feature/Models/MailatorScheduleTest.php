@@ -29,7 +29,7 @@ class MailatorScheduleTest extends TestCase
             ->mailable(new InvoiceReminderMailable())
             ->days(1)
             ->before(now()->addWeek())
-            ->when(function() {
+            ->when(function () {
                 return 'Working.';
             })
             ->save();
@@ -65,7 +65,7 @@ class MailatorScheduleTest extends TestCase
         MailatorSchedule::run();
         Mail::assertSent(InvoiceReminderMailable::class, 1);
 
-        Mail::assertSent(InvoiceReminderMailable::class, function(InvoiceReminderMailable $mail) {
+        Mail::assertSent(InvoiceReminderMailable::class, function (InvoiceReminderMailable $mail) {
             return $mail->hasTo('foo@bar.com') && $mail->hasTo('zoo@bar.com');
         });
     }
