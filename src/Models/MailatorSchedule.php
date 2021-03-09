@@ -62,6 +62,7 @@ class MailatorSchedule extends Model
     const TIME_FRAME_ORIGIN_BEFORE = 'before';
     const TIME_FRAME_ORIGIN_AFTER = 'after';
 
+    const FREQUENCY_OPTIONS_MANY = 'many';
     const FREQUENCY_OPTIONS_ONCE = 'once';
     const FREQUENCY_OPTIONS_HOURLY = 'hourly';
     const FREQUENCY_OPTIONS_DAILY = 'daily';
@@ -114,6 +115,13 @@ class MailatorSchedule extends Model
         return $this;
     }
 
+    public function many(): self
+    {
+        $this->frequency_option = static::FREQUENCY_OPTIONS_MANY;
+
+        return $this;
+    }
+
     public function hourly(): self
     {
         $this->frequency_option = static::FREQUENCY_OPTIONS_HOURLY;
@@ -135,7 +143,7 @@ class MailatorSchedule extends Model
         return $this;
     }
 
-    public function after(SendScheduleConstraint $date = null): self
+    public function after(CarbonInterface $date = null): self
     {
         $this->time_frame_origin = static::TIME_FRAME_ORIGIN_AFTER;
 
@@ -187,6 +195,11 @@ class MailatorSchedule extends Model
     public function isOnce(): bool
     {
         return $this->frequency_option === static::FREQUENCY_OPTIONS_ONCE;
+    }
+
+    public function isMany(): bool
+    {
+        return $this->frequency_option === static::FREQUENCY_OPTIONS_MANY;
     }
 
     public function toDays(): int

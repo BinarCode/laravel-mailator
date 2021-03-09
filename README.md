@@ -152,6 +152,8 @@ $scheduler = MailatorSchedule::init('Invoice reminder.')
     ->save();
 ```
 
+The `CustomAction` should implement the `Binarcode\LaravelMailator\Actions\Action` class.
+
 ### Testing
 
 ``` bash

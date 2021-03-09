@@ -25,12 +25,7 @@ class CreateMailatorTables extends Migration
             $table->json('constraints')->nullable()->comment('Offset target.');
             $table->json('recipients')->nullable();
             $table->text('when')->nullable();
-            $table->enum('frequency_option', [
-                MailatorSchedule::FREQUENCY_OPTIONS_ONCE,
-                MailatorSchedule::FREQUENCY_OPTIONS_HOURLY,
-                MailatorSchedule::FREQUENCY_OPTIONS_DAILY,
-                MailatorSchedule::FREQUENCY_OPTIONS_WEEKLY,
-            ])->default(MailatorSchedule::FREQUENCY_OPTIONS_ONCE)->comment('How often send email notification.');
+            $table->string('frequency_option')->default(MailatorSchedule::FREQUENCY_OPTIONS_ONCE)->comment('How often send email notification.');
 
             $table->timestamp('last_sent_at')->nullable();
             $table->timestamp('last_failed_at')->nullable();
