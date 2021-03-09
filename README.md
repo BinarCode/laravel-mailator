@@ -146,7 +146,7 @@ Using `Scheduler` you can even define your custom action:
 
 ```php
 $scheduler = MailatorSchedule::init('Invoice reminder.')
-    ->recipients([ 'zoo@bar.com'])
+    ->days(1)
     ->before(now()->addWeek())
     ->actionClass(CustomAction::class)
     ->save();

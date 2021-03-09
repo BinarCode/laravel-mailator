@@ -132,9 +132,6 @@ class MailatorScheduleTest extends TestCase
         $mock->shouldReceive('handle')->once();
 
         MailatorSchedule::init('Invoice reminder.')
-            ->recipients([
-                'zoo@bar.com',
-            ])
             ->days(1)
             ->before(now()->addDays(2))
             ->actionClass(CustomAction::class)
