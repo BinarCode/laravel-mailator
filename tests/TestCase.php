@@ -10,6 +10,20 @@ use Swift_Mailer;
 
 class TestCase extends Orchestra
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->loadMigrationsFrom([
+            '--database' => 'sqlite',
+            '--path' => realpath(__DIR__.DIRECTORY_SEPARATOR.'database/migrations'),
+        ]);
+
+        \Illuminate\Database\Eloquent\Factories\Factory::guessFactoryNamesUsing(
+            fn (string $modelName) => 'Binarcode\\LaravelMailator\\Tests\\database\\Factories\\'.class_basename($modelName).'Factory'
+        );
+    }
+
     protected function tearDown(): void
     {
         m::close();

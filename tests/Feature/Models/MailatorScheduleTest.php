@@ -3,6 +3,7 @@
 namespace Binarcode\LaravelMailator\Tests\Feature\Models;
 
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
+use Binarcode\LaravelMailator\Tests\database\Factories\UserFactory;
 use Binarcode\LaravelMailator\Tests\Fixtures\CustomAction;
 use Binarcode\LaravelMailator\Tests\Fixtures\InvoiceReminderMailable;
 use Binarcode\LaravelMailator\Tests\Fixtures\SerializedConditionCondition;
@@ -23,16 +24,21 @@ class MailatorScheduleTest extends TestCase
 
     public function test_can_create_mailator_schedule()
     {
+        $user = UserFactory::one();
+
         MailatorSchedule::init('Invoice reminder.')
             ->mailable(new InvoiceReminderMailable())
             ->days(1)
             ->before(now()->addWeek())
+            ->target($user)
             ->when(function () {
                 return 'Working.';
             })
             ->save();
 
         $this->assertCount(1, MailatorSchedule::all());
+
+        self::assertCount(1, $user->schedulers);
     }
 
     public function test_sending_email_only_once()
