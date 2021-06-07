@@ -15,6 +15,7 @@ class CreateMailatorTables extends Migration
 
             $table->string('name', 100)->nullable();
             $table->text('mailable_class')->nullable();
+            $table->nullableMorphs('targetable');
             $table->text('action')->nullable();
             $table->unsignedInteger('delay_minutes')->nullable()->comment('Number of hours/days.');
             $table->enum('time_frame_origin', [

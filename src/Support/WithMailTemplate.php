@@ -47,6 +47,7 @@ trait WithMailTemplate
         return $this;
     }
 
+
     /**
      * Set the mailator template layout.
      *

@@ -2,7 +2,6 @@
 
 namespace Binarcode\LaravelMailator\Tests\Feature\Models;
 
-use Binarcode\LaravelMailator\Constraints\SendScheduleConstraint;
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use Binarcode\LaravelMailator\Tests\Fixtures\CustomAction;
 use Binarcode\LaravelMailator\Tests\Fixtures\InvoiceReminderMailable;
@@ -10,7 +9,6 @@ use Binarcode\LaravelMailator\Tests\Fixtures\SerializedConditionCondition;
 use Binarcode\LaravelMailator\Tests\Fixtures\SingleSendingCondition;
 use Binarcode\LaravelMailator\Tests\Fixtures\User;
 use Binarcode\LaravelMailator\Tests\TestCase;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
 use Spatie\TestTime\TestTime;
 
@@ -28,6 +26,21 @@ class MailatorScheduleTest extends TestCase
         MailatorSchedule::init('Invoice reminder.')
             ->mailable(new InvoiceReminderMailable())
             ->days(1)
+            ->before(now()->addWeek())
+            ->when(function () {
+                return 'Working.';
+            })
+            ->save();
+
+        $this->assertCount(1, MailatorSchedule::all());
+    }
+
+    public function test_can_create_mailator_schedule_with_target()
+    {
+        MailatorSchedule::init('Invoice reminder.')
+            ->mailable(new InvoiceReminderMailable())
+            ->days(1)
+            ->target($model)
             ->before(now()->addWeek())
             ->when(function () {
                 return 'Working.';

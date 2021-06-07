@@ -20,6 +20,7 @@ trait ReplaceModelAttributes
     public function replaceModelAttributes(string $text, string $replaceText, Model $model)
     {
         return preg_replace_callback('/::' . $replaceText . '::/', function ($match) use ($model) {
+            dd('here');
             $parts = collect(explode('.', $match[0] ?? ''));
 
             $replace = $parts->reduce(function ($value, $part) {
