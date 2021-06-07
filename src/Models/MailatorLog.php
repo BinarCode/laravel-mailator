@@ -40,6 +40,6 @@ class MailatorLog extends Model
 
     public function isSent(): bool
     {
-       return $this->status === static::STATUS_SENT;
+        return $this->status === static::STATUS_SENT;
     }
 }
