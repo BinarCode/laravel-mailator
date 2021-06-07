@@ -21,6 +21,8 @@ use Opis\Closure\SerializableClosure;
 /**
  * Class MailatorSchedule.
  *
+ * @property string tag
+ * @property string name
  * @property string targetable_type
  * @property string targetable_id
  * @property string mailable_class
@@ -358,6 +360,17 @@ class MailatorSchedule extends Model
         }
 
         $this->action = $action;
+
+        return $this;
+    }
+
+    public function tag(string|array $tag): self
+    {
+        if (is_array($tag)) {
+            $tag = implode(',', $tag);
+        }
+
+        $this->tag = $tag;
 
         return $this;
     }
