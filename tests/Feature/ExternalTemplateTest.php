@@ -18,10 +18,8 @@ class ExternalTemplateTest extends TestCase
         Mail::to('foo@bar.com')->send(new WelcomeMailable());
 
 
-        Mail::assertSent(WelcomeMailable::class, function(WelcomeMailable $mailable) {
+        Mail::assertSent(WelcomeMailable::class, function (WelcomeMailable $mailable) {
             dd($mailable->build());
         });
-
     }
-
 }
