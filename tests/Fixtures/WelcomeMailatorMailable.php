@@ -11,8 +11,8 @@ use Illuminate\Mail\Mailable;
 
 class WelcomeMailatorMailable extends Mailable
 {
-    use Queueable,
-        WithMailTemplate;
+    use Queueable;
+    use WithMailTemplate;
 
     /**
      * @var Model

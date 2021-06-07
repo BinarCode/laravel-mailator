@@ -7,13 +7,13 @@ use Binarcode\LaravelMailator\Constraints\SendScheduleConstraint;
 use Binarcode\LaravelMailator\Exceptions\InstanceException;
 use Binarcode\LaravelMailator\Jobs\SendMailJob;
 use Binarcode\LaravelMailator\Models\Concerns\ConstraintsResolver;
+use Binarcode\LaravelMailator\Models\Concerns\HasTarget;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Closure;
 use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Opis\Closure\SerializableClosure;
@@ -21,6 +21,8 @@ use Opis\Closure\SerializableClosure;
 /**
  * Class MailatorSchedule.
  *
+ * @property string targetable_type
+ * @property string targetable_id
  * @property string mailable_class
  * @property string delay_minutes
  * @property string time_frame_origin
@@ -34,6 +36,7 @@ use Opis\Closure\SerializableClosure;
 class MailatorSchedule extends Model
 {
     use ConstraintsResolver;
+    use HasTarget;
 
     public function getTable()
     {

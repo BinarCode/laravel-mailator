@@ -154,6 +154,29 @@ $scheduler = MailatorSchedule::init('Invoice reminder.')
 
 The `CustomAction` should implement the `Binarcode\LaravelMailator\Actions\Action` class.
 
+### Target
+
+You can link the scheduler with any entity like this:
+
+```php
+        MailatorSchedule::init('Invoice reminder.')
+            ->mailable(new InvoiceReminderMailable())
+            ->days(1)
+            ->target($invoice)
+            ->save();
+```
+
+and then in the `Invoice` model you can get all emails related to it: 
+
+```php
+// app/Models/Invoice.php
+public function schedulers() 
+{
+        return $this->morphMany(Binarcode\LaravelMailator\Models\MailatorSchedule::class, 'targetable');
+}
+...
+```
+
 ### Testing
 
 ``` bash
