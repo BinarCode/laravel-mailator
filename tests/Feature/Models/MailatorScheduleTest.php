@@ -35,21 +35,6 @@ class MailatorScheduleTest extends TestCase
         $this->assertCount(1, MailatorSchedule::all());
     }
 
-    public function test_can_create_mailator_schedule_with_target()
-    {
-        MailatorSchedule::init('Invoice reminder.')
-            ->mailable(new InvoiceReminderMailable())
-            ->days(1)
-            ->target($model)
-            ->before(now()->addWeek())
-            ->when(function () {
-                return 'Working.';
-            })
-            ->save();
-
-        $this->assertCount(1, MailatorSchedule::all());
-    }
-
     public function test_sending_email_only_once()
     {
         Mail::fake();
