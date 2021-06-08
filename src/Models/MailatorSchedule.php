@@ -278,14 +278,18 @@ class MailatorSchedule extends Model
         return $this->configurationsPasses() && $this->whenPasses() && $this->eventsPasses();
     }
 
-    public function execute(): void
+    public function execute(bool $now = false): void
     {
         $this->save();
 
         if ($this->hasCustomAction()) {
             app($this->action)->handle($this);
         } else {
-            dispatch(new SendMailJob($this));
+            if ($now) {
+                dispatch_sync(new SendMailJob($this));
+            } else {
+                dispatch(new SendMailJob($this));
+            }
         }
     }
 
