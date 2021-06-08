@@ -364,7 +364,7 @@ class MailatorSchedule extends Model
         return $this;
     }
 
-    public function tag(string|array $tag): self
+    public function tag(string | array $tag): self
     {
         if (is_array($tag)) {
             $tag = implode(',', $tag);
