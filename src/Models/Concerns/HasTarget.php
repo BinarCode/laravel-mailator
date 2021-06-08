@@ -20,7 +20,7 @@ trait HasTarget
 
     public function target(Model $target): self
     {
-        $this->targetable_type = $target::class;
+        $this->targetable_type = $target->getMorphClass();
         $this->targetable_id = $target->getKey();
 
         return $this;
