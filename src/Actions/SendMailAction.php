@@ -14,9 +14,9 @@ class SendMailAction implements Action
         try {
             $this->sendMail($schedule);
         } catch (Exception $exception) {
-            report($exception);
-
             $schedule->markAsFailed($exception->getMessage());
+
+            report($exception);
         }
     }
 
