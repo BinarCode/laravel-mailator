@@ -278,19 +278,23 @@ class MailatorSchedule extends Model
         return $this->configurationsPasses() && $this->whenPasses() && $this->eventsPasses();
     }
 
-    public static function run()
+    public function execute(): void
+    {
+        $this->save();
+
+        if ($this->hasCustomAction()) {
+            app($this->action)->handle($this);
+        } else {
+            dispatch(new SendMailJob($this));
+        }
+    }
+
+    public static function run(): void
     {
         static::query()
-            ->get()->lazy()
+            ->cursor()
             ->filter(fn (self $schedule) => $schedule->shouldSend())
-            ->filter(fn (self $schedule) => $schedule->hasCustomAction())
-            ->each(fn (self $schedule) => app($schedule->action)->handle($schedule));
-
-        static::query()
-            ->get()->lazy()
-            ->filter(fn (self $schedule) => $schedule->shouldSend())
-            ->filter(fn (self $schedule) => ! $schedule->hasCustomAction())
-            ->each(fn (self $schedule) => dispatch(new SendMailJob($schedule)));
+            ->each(fn (self $schedule) => $schedule->execute());
     }
 
     public function hasCustomAction(): bool
