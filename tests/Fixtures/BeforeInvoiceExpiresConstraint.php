@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 
 class BeforeInvoiceExpiresConstraint implements SendScheduleConstraint
 {
-    public function canSend(MailatorSchedule $mailatorSchedule, Collection $log): bool
+    public function canSend(MailatorSchedule $schedule, Collection $log): bool
     {
         return true;
     }
