@@ -26,7 +26,7 @@ class MailatorScheduleTest extends TestCase
     {
         $user = UserFactory::one();
 
-        MailatorSchedule::init('Invoice reminder.')
+        MailatorSchedule::init($name = 'Invoice reminder.')
             ->mailable(new InvoiceReminderMailable())
             ->days(1)
             ->before(now()->addWeek())
@@ -37,6 +37,11 @@ class MailatorScheduleTest extends TestCase
             ->save();
 
         $this->assertCount(1, MailatorSchedule::all());
+
+        self::assertSame(
+            $name,
+            MailatorSchedule::first()->name
+        );
 
         self::assertCount(1, $user->schedulers);
     }
