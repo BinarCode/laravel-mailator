@@ -21,7 +21,7 @@ use Opis\Closure\SerializableClosure;
 /**
  * Class MailatorSchedule.
  *
- * @property string tag
+ * @property string tags
  * @property string name
  * @property string targetable_type
  * @property string targetable_id
@@ -78,6 +78,7 @@ class MailatorSchedule extends Model
 
     protected $fillable = [
         'name',
+        'tags',
         'action',
         'recipients',
         'mailable_class',
@@ -411,7 +412,7 @@ class MailatorSchedule extends Model
             $tag = implode(',', $tag);
         }
 
-        $this->tag = $tag;
+        $this->tags = $tag;
 
         return $this;
     }
