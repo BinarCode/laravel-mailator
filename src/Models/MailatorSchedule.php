@@ -274,11 +274,13 @@ class MailatorSchedule extends Model
         return $this;
     }
 
-    public function recipients(array $recipients): self
+    public function recipients(...$recipients): self
     {
-        $this->recipients = collect($recipients)
+        $this->recipients = array_merge(collect($recipients)
+            ->flatten()
             ->filter(fn ($email) => $this->ensureValidEmail($email))
-            ->toArray();
+            ->unique()
+            ->toArray(), $this->recipients ?? []);
 
         return $this;
     }

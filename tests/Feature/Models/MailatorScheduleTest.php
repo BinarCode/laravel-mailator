@@ -284,4 +284,24 @@ class MailatorScheduleTest extends TestCase
 
         MailatorSchedule::run();
     }
+
+    public function test_recipients_merges()
+    {
+        Mail::fake();
+
+        $scheduler = MailatorSchedule::init('Invoice reminder.')
+            ->recipients(
+                $mail = 'zoo@bar.com',
+            );
+
+        self::assertSame([$mail], $scheduler->recipients);
+
+        $scheduler->recipients([$mail2 = 'foo@bar.com']);
+
+        self::assertSame([$mail2, $mail], $scheduler->recipients);
+
+        $scheduler->recipients($mail3 = 'too@bar.com');
+
+        self::assertSame([$mail3, $mail2, $mail], $scheduler->recipients);
+    }
 }
