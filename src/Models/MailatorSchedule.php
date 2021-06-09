@@ -33,6 +33,8 @@ use Opis\Closure\SerializableClosure;
  * @property array recipients
  * @property string action
  * @property Closure when
+ * @property Carbon last_failed_at
+ * @property Carbon last_sent_at
  * @property string frequency_option
  */
 class MailatorSchedule extends Model
@@ -45,13 +47,13 @@ class MailatorSchedule extends Model
         return config('mailator.schedulers_table_name', 'mailator_schedulers');
     }
 
-    const MINUTES_IN_HOUR = 60;
-    const MINUTES_IN_DAY = 60 * 60;
-    const MINUTES_IN_WEEK = 168 * 60;
-    const HOURS_IN_DAY = 24;
-    const HOURS_IN_WEEK = 168;
+    public const MINUTES_IN_HOUR = 60;
+    public const MINUTES_IN_DAY = 60 * 60;
+    public const MINUTES_IN_WEEK = 168 * 60;
+    public const HOURS_IN_DAY = 24;
+    public const HOURS_IN_WEEK = 168;
 
-    const FREQUENCY_IN_HOURS = [
+    public const FREQUENCY_IN_HOURS = [
         'single' => PHP_INT_MAX,
         'hourly' => 1,
         'daily' => self::HOURS_IN_DAY,
@@ -63,16 +65,16 @@ class MailatorSchedule extends Model
         '168' => 'Weeks',
     ];
 
-    const TIME_FRAME_ORIGIN_BEFORE = 'before';
-    const TIME_FRAME_ORIGIN_AFTER = 'after';
+    public const TIME_FRAME_ORIGIN_BEFORE = 'before';
+    public const TIME_FRAME_ORIGIN_AFTER = 'after';
 
-    const FREQUENCY_OPTIONS_MANY = 'many';
-    const FREQUENCY_OPTIONS_ONCE = 'once';
-    const FREQUENCY_OPTIONS_HOURLY = 'hourly';
-    const FREQUENCY_OPTIONS_DAILY = 'daily';
-    const FREQUENCY_OPTIONS_WEEKLY = 'weekly';
-    const FREQUENCY_OPTIONS_NEVER = 'never';
-    const FREQUENCY_OPTIONS_MANUAL = 'manual';
+    public const FREQUENCY_OPTIONS_MANY = 'many';
+    public const FREQUENCY_OPTIONS_ONCE = 'once';
+    public const FREQUENCY_OPTIONS_HOURLY = 'hourly';
+    public const FREQUENCY_OPTIONS_DAILY = 'daily';
+    public const FREQUENCY_OPTIONS_WEEKLY = 'weekly';
+    public const FREQUENCY_OPTIONS_NEVER = 'never';
+    public const FREQUENCY_OPTIONS_MANUAL = 'manual';
 
     protected $fillable = [
         'action',
@@ -93,6 +95,8 @@ class MailatorSchedule extends Model
         'constraints' => 'array',
         'recipients' => 'array',
         'timestamp_target' => 'datetime',
+        'last_failed_at' => 'datetime',
+        'last_sent_at' => 'datetime',
     ];
 
     protected $dates = [
