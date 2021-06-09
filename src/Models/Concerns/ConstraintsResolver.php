@@ -6,6 +6,7 @@ namespace Binarcode\LaravelMailator\Models\Concerns;
 use Binarcode\LaravelMailator\Constraints\AfterConstraint;
 use Binarcode\LaravelMailator\Constraints\BeforeConstraint;
 use Binarcode\LaravelMailator\Constraints\DailyConstraint;
+use Binarcode\LaravelMailator\Constraints\ManualConstraint;
 use Binarcode\LaravelMailator\Constraints\ManyConstraint;
 use Binarcode\LaravelMailator\Constraints\NeverConstraint;
 use Binarcode\LaravelMailator\Constraints\OnceConstraint;
@@ -26,6 +27,7 @@ trait ConstraintsResolver
             BeforeConstraint::class,
             AfterConstraint::class,
             NeverConstraint::class,
+            ManualConstraint::class,
             OnceConstraint::class,
             ManyConstraint::class,
             DailyConstraint::class,

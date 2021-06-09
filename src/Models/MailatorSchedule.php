@@ -72,6 +72,7 @@ class MailatorSchedule extends Model
     const FREQUENCY_OPTIONS_DAILY = 'daily';
     const FREQUENCY_OPTIONS_WEEKLY = 'weekly';
     const FREQUENCY_OPTIONS_NEVER = 'never';
+    const FREQUENCY_OPTIONS_MANUAL = 'manual';
 
     protected $fillable = [
         'action',
@@ -116,6 +117,13 @@ class MailatorSchedule extends Model
     public function once(): self
     {
         $this->frequency_option = static::FREQUENCY_OPTIONS_ONCE;
+
+        return $this;
+    }
+
+    public function manual(): self
+    {
+        $this->frequency_option = static::FREQUENCY_OPTIONS_MANUAL;
 
         return $this;
     }
@@ -212,6 +220,11 @@ class MailatorSchedule extends Model
     public function isNever(): bool
     {
         return $this->frequency_option === static::FREQUENCY_OPTIONS_NEVER;
+    }
+
+    public function isManual(): bool
+    {
+        return $this->frequency_option === static::FREQUENCY_OPTIONS_MANUAL;
     }
 
     public function isMany(): bool

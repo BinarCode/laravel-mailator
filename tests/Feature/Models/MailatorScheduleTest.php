@@ -94,6 +94,26 @@ class MailatorScheduleTest extends TestCase
         Mail::assertSent(InvoiceReminderMailable::class, 0);
     }
 
+    public function test_sending_email_manual_dont_send_automatically()
+    {
+        Mail::fake();
+        Mail::assertNothingSent();
+
+        MailatorSchedule::init('Invoice reminder.')
+            ->manual()
+            ->recipients([
+                'zoo@bar.com',
+            ])
+            ->mailable(
+                (new InvoiceReminderMailable())->to('foo@bar.com')
+            )
+            ->days(1)
+            ->save();
+
+        MailatorSchedule::run();
+        Mail::assertSent(InvoiceReminderMailable::class, 0);
+    }
+
     public function test_can_send_serialized_constrained()
     {
         Mail::fake();
