@@ -2,7 +2,6 @@
 
 namespace Binarcode\LaravelMailator\Models\Concerns;
 
-use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
@@ -15,6 +14,6 @@ trait HasMailatorSchedulers
 {
     public function schedulers(): MorphMany
     {
-        return $this->morphMany(MailatorSchedule::class, 'targetable');
+        return $this->morphMany(config('mailator.scheduler.model'), 'targetable');
     }
 }
