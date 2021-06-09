@@ -77,6 +77,7 @@ class MailatorSchedule extends Model
     public const FREQUENCY_OPTIONS_MANUAL = 'manual';
 
     protected $fillable = [
+        'name',
         'action',
         'recipients',
         'mailable_class',
