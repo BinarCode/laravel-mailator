@@ -67,7 +67,7 @@ class LaravelMailatorServiceProvider extends ServiceProvider
             ], 'lang');*/
 
             // Registering package commands.
-             $this->commands([
+            $this->commands([
                  GarbageCollectorCommand::class,
                  MailatorSchedulerCommand::class,
              ]);
