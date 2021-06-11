@@ -328,15 +328,10 @@ class MailatorSchedule extends Model
     {
         try {
             $this->load('logs');
-
             return $this->configurationsPasses() && $this->whenPasses() && $this->eventsPasses();
-<<<<<<< Updated upstream
-        } catch (Exception | Throwable) {
-=======
         } catch (Exception|Throwable $e) {
             $this->markAsFailed($e->getMessage());
 
->>>>>>> Stashed changes
             return false;
         }
     }
@@ -359,12 +354,8 @@ class MailatorSchedule extends Model
                     dispatch(new SendMailJob($this));
                 }
             }
-<<<<<<< Updated upstream
-        } catch (Exception | Throwable) {
-=======
         } catch (Exception|Throwable $e) {
             $this->markAsFailed($e->getMessage());
->>>>>>> Stashed changes
         }
     }
 
