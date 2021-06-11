@@ -4,7 +4,6 @@ namespace Binarcode\LaravelMailator\Models;
 
 use Binarcode\LaravelMailator\Actions\Action;
 use Binarcode\LaravelMailator\Constraints\SendScheduleConstraint;
-use Binarcode\LaravelMailator\Exceptions\InstanceException;
 use Binarcode\LaravelMailator\Jobs\SendMailJob;
 use Binarcode\LaravelMailator\Models\Builders\MailatorSchedulerBuilder;
 use Binarcode\LaravelMailator\Models\Concerns\ConstraintsResolver;

@@ -6,10 +6,10 @@ use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use Binarcode\LaravelMailator\Tests\Fixtures\InvoiceReminderMailable;
 use Binarcode\LaravelMailator\Tests\Fixtures\SerializedConditionCondition;
 use Binarcode\LaravelMailator\Tests\Fixtures\SingleSendingCondition;
+use Binarcode\LaravelMailator\Tests\Fixtures\User;
 use Binarcode\LaravelMailator\Tests\TestCase;
 use Illuminate\Support\Facades\Mail;
 use Spatie\TestTime\TestTime;
-use Binarcode\LaravelMailator\Tests\Fixtures\User;
 
 class SchedulerDefaultConstraintsTest extends TestCase
 {
