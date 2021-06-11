@@ -27,10 +27,10 @@ class MailatorScheduleCommandTest extends TestCase
             ->constraint(new TrueConstraint)
             ->actionClass(
                 new CustomAction(
-                $user = User::factory()->create([
+                    $user = User::factory()->create([
                         'email_verified_at' => null,
                     ])
-            )
+                )
             )
             ->save();
 
