@@ -46,6 +46,5 @@ class AfterConstraint implements SendScheduleConstraint
         return $schedule->isOnce()
             ? $schedule->timestamp_target->diffInHours(now()) === $schedule->delay_minutes
             : $schedule->timestamp_target->diffInHours(now()) > $schedule->delay_minutes;
-
     }
 }

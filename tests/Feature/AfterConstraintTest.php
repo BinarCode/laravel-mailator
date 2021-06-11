@@ -75,5 +75,4 @@ class AfterConstraintTest extends TestCase
             $can
         );
     }
-
 }
