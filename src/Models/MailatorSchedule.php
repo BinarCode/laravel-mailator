@@ -13,12 +13,14 @@ use Binarcode\LaravelMailator\Support\ClassResolver;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Closure;
+use Exception;
 use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Opis\Closure\SerializableClosure;
+use Throwable;
 
 /**
  * Class MailatorSchedule.
@@ -324,27 +326,33 @@ class MailatorSchedule extends Model
 
     public function shouldSend(): bool
     {
-        $this->load('logs');
-
-        return $this->configurationsPasses() && $this->whenPasses() && $this->eventsPasses();
+        try {
+            $this->load('logs');
+            return $this->configurationsPasses() && $this->whenPasses() && $this->eventsPasses();
+        } catch (Exception|Throwable) {
+            return false;
+        }
     }
 
     public function execute(bool $now = false): void
     {
         $this->save();
 
-        if ($this->hasCustomAction()) {
-            unserialize($this->action)->handle($this);
+        try {
+            if ($this->hasCustomAction()) {
+                unserialize($this->action)->handle($this);
 
-            $this->markAsSent();
+                $this->markAsSent();
 
-            static::garbageResolver()->handle($this);
-        } else {
-            if ($now) {
-                dispatch_sync(new SendMailJob($this));
+                static::garbageResolver()->handle($this);
             } else {
-                dispatch(new SendMailJob($this));
+                if ($now) {
+                    dispatch_sync(new SendMailJob($this));
+                } else {
+                    dispatch(new SendMailJob($this));
+                }
             }
+        } catch (Exception|Throwable) {
         }
     }
 

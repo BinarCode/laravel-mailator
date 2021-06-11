@@ -58,7 +58,24 @@ class AfterConstraintTest extends TestCase
 
         $scheduler->save();
 
-        $this->travel(3)->hours();
+        $this->travel(1)->hours();
+
+        $can = app(
+            AfterConstraint::class
+        )->canSend(
+            $scheduler,
+            $scheduler->logs
+        );
+
+        self::assertTrue(
+            $scheduler->fresh()->isFutureAction()
+        );
+
+        self::assertTrue(
+            $can
+        );
+
+        $this->travel(1)->hours();
 
         $can = app(
             AfterConstraint::class
