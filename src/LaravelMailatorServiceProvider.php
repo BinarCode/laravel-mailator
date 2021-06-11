@@ -2,6 +2,8 @@
 
 namespace Binarcode\LaravelMailator;
 
+use Binarcode\LaravelMailator\Console\Commands\GarbageCollectorCommand;
+use Binarcode\LaravelMailator\Console\Commands\MailatorSchedulerCommand;
 use Binarcode\LaravelMailator\Models\MailatorLog;
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use Binarcode\LaravelMailator\Models\MailTemplate;
@@ -65,7 +67,10 @@ class LaravelMailatorServiceProvider extends ServiceProvider
             ], 'lang');*/
 
             // Registering package commands.
-            // $this->commands([]);
+             $this->commands([
+                 GarbageCollectorCommand::class,
+                 MailatorSchedulerCommand::class,
+             ]);
         }
     }
 

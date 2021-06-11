@@ -113,6 +113,10 @@ class MailatorSchedule extends Model
         'end_at' => 'datetime',
     ];
 
+    protected $attributes = [
+        'frequency_option' => self::FREQUENCY_OPTIONS_ONCE,
+    ];
+
     public static function init(string $name): self
     {
         return new static(['name' => $name]);
