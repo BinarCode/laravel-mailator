@@ -328,8 +328,9 @@ class MailatorSchedule extends Model
     {
         try {
             $this->load('logs');
+
             return $this->configurationsPasses() && $this->whenPasses() && $this->eventsPasses();
-        } catch (Exception|Throwable) {
+        } catch (Exception | Throwable) {
             return false;
         }
     }
@@ -352,7 +353,7 @@ class MailatorSchedule extends Model
                     dispatch(new SendMailJob($this));
                 }
             }
-        } catch (Exception|Throwable) {
+        } catch (Exception | Throwable) {
         }
     }
 

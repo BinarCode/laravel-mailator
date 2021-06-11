@@ -25,11 +25,12 @@ class MailatorScheduleCommandTest extends TestCase
 
         MailatorSchedule::init('B')
             ->constraint(new TrueConstraint)
-            ->actionClass(new CustomAction(
-                    $user = User::factory()->create([
+            ->actionClass(
+                new CustomAction(
+                $user = User::factory()->create([
                         'email_verified_at' => null,
                     ])
-                )
+            )
             )
             ->save();
 
@@ -39,6 +40,5 @@ class MailatorScheduleCommandTest extends TestCase
         );
 
         self::assertTrue($user->fresh()->hasVerifiedEmail());
-
     }
 }
