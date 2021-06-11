@@ -17,14 +17,34 @@ class AfterConstraint implements SendScheduleConstraint
             return true;
         }
 
-        // it's in the future
-        if (now()->lt($schedule->timestamp_target)) {
+        if ($schedule->toDays() > 0) {
+            if (now()->lt($schedule->timestamp_target->clone()->addDays($schedule->toDays()))) {
+                return false;
+            }
+
+            return $schedule->isOnce()
+                ? $schedule->timestamp_target->diffInDays(now()) === $schedule->toDays()
+                : $schedule->timestamp_target->diffInDays(now()) > $schedule->toDays();
+        }
+
+        if ($schedule->toHours() > 0) {
+            if (now()->lt($schedule->timestamp_target->clone()->addHours($schedule->toHours()))) {
+                return false;
+            }
+
+            //till ends we should have at least toDays days
+            return $schedule->isOnce()
+                ? $schedule->timestamp_target->diffInHours(now()) === $schedule->toHours()
+                : $schedule->timestamp_target->diffInHours(now()) > $schedule->toHours();
+        }
+
+        if (now()->lt($schedule->timestamp_target->clone()->addMinutes($schedule->delay_minutes))) {
             return false;
         }
 
         //till ends we should have at least toDays days
         return $schedule->isOnce()
-            ? $schedule->timestamp_target->diffInDays(now()) === $schedule->toDays()
-            : $schedule->timestamp_target->diffInDays(now()) > $schedule->toDays();
+            ? $schedule->timestamp_target->diffInHours(now()) === $schedule->delay_minutes
+            : $schedule->timestamp_target->diffInHours(now()) > $schedule->delay_minutes;
     }
 }

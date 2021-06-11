@@ -31,6 +31,7 @@ class CreateMailatorTables extends Migration
 
             $table->timestamp('last_sent_at')->nullable();
             $table->timestamp('last_failed_at')->nullable();
+            $table->timestamp('completed_at')->nullable();
             $table->text('failure_reason')->nullable();
             $table->timestamps();
         });
