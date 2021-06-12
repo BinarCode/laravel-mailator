@@ -2,6 +2,6 @@
 
 namespace Binarcode\LaravelMailator;
 
-class LaravelMailator
+class MailatorManager
 {
 }

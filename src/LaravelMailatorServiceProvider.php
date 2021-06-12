@@ -84,7 +84,11 @@ class LaravelMailatorServiceProvider extends ServiceProvider
 
         // Register the main class to use with the facade
         $this->app->singleton('mailator', function () {
-            return new LaravelMailator();
+            return new MailatorManager();
+        });
+
+        $this->app->singleton('mailator-scheduler', function () {
+            return new SchedulerManager();
         });
     }
 }
