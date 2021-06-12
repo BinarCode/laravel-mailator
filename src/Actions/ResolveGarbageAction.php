@@ -31,7 +31,7 @@ class ResolveGarbageAction implements Action
             return false;
         }
 
-        if (!$schedule->nextTrigger()) {
+        if (! $schedule->nextTrigger()) {
             return true;
         }
 

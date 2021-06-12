@@ -9,7 +9,4 @@ class ConverterEnum
     public const MINUTES_IN_WEEK = 168 * 60;
     public const HOURS_IN_DAY = 24;
     public const HOURS_IN_WEEK = 168;
-
-
-
 }
