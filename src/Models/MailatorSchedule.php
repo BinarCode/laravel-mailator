@@ -3,6 +3,7 @@
 namespace Binarcode\LaravelMailator\Models;
 
 use Binarcode\LaravelMailator\Actions\Action;
+use Binarcode\LaravelMailator\Actions\ResolveGarbageAction;
 use Binarcode\LaravelMailator\Constraints\SendScheduleConstraint;
 use Binarcode\LaravelMailator\Jobs\SendMailJob;
 use Binarcode\LaravelMailator\Models\Builders\MailatorSchedulerBuilder;
@@ -10,12 +11,14 @@ use Binarcode\LaravelMailator\Models\Concerns\ConstraintsResolver;
 use Binarcode\LaravelMailator\Models\Concerns\HasFuture;
 use Binarcode\LaravelMailator\Models\Concerns\HasTarget;
 use Binarcode\LaravelMailator\Support\ClassResolver;
+use Binarcode\LaravelMailator\Support\ConverterEnum;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Closure;
 use Exception;
 use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -54,24 +57,6 @@ class MailatorSchedule extends Model
     {
         return config('mailator.schedulers_table_name', 'mailator_schedulers');
     }
-
-    public const MINUTES_IN_HOUR = 60;
-    public const MINUTES_IN_DAY = 60 * 60;
-    public const MINUTES_IN_WEEK = 168 * 60;
-    public const HOURS_IN_DAY = 24;
-    public const HOURS_IN_WEEK = 168;
-
-    public const FREQUENCY_IN_HOURS = [
-        'single' => PHP_INT_MAX,
-        'hourly' => 1,
-        'daily' => self::HOURS_IN_DAY,
-        'weekly' => self::HOURS_IN_WEEK,
-    ];
-
-    const DELAY_OPTIONS = [
-        '24' => 'Days',
-        '168' => 'Weeks',
-    ];
 
     public const TIME_FRAME_ORIGIN_BEFORE = 'before';
     public const TIME_FRAME_ORIGIN_AFTER = 'after';
@@ -169,14 +154,14 @@ class MailatorSchedule extends Model
         return $this;
     }
 
-    public function daily()
+    public function daily(): static
     {
         $this->frequency_option = static::FREQUENCY_OPTIONS_DAILY;
 
         return $this;
     }
 
-    public function weekly()
+    public function weekly(): static
     {
         $this->frequency_option = static::FREQUENCY_OPTIONS_WEEKLY;
 
@@ -256,12 +241,12 @@ class MailatorSchedule extends Model
     {
         //let's say we have 1 day and 2 hours till day job ends
         //so we will floor it to 1, and will send the reminder in time
-        return (int) floor($this->delay_minutes / static::MINUTES_IN_DAY);
+        return (int) floor($this->delay_minutes / ConverterEnum::MINUTES_IN_DAY);
     }
 
     public function toHours(): int
     {
-        return (int) floor($this->delay_minutes / static::MINUTES_IN_HOUR);
+        return (int) floor($this->delay_minutes / ConverterEnum::MINUTES_IN_HOUR);
     }
 
     public function minutes(int $number): self
@@ -273,21 +258,21 @@ class MailatorSchedule extends Model
 
     public function hours(int $number): self
     {
-        $this->delay_minutes = $number * static::MINUTES_IN_HOUR;
+        $this->delay_minutes = $number * ConverterEnum::MINUTES_IN_HOUR;
 
         return $this;
     }
 
     public function days(int $number): self
     {
-        $this->delay_minutes = $number * static::MINUTES_IN_DAY;
+        $this->delay_minutes = $number * ConverterEnum::MINUTES_IN_DAY;
 
         return $this;
     }
 
-    public function weeks(int $number)
+    public function weeks(int $number): static
     {
-        $this->delay_minutes = $number * static::MINUTES_IN_WEEK;
+        $this->delay_minutes = $number * ConverterEnum::MINUTES_IN_WEEK;
 
         return $this;
     }
@@ -319,7 +304,7 @@ class MailatorSchedule extends Model
         return $this;
     }
 
-    public function logs()
+    public function logs(): HasMany
     {
         return $this->hasMany(MailatorLog::class, 'mailator_schedule_id');
     }
@@ -329,9 +314,12 @@ class MailatorSchedule extends Model
         try {
             $this->load('logs');
 
+
             return $this->configurationsPasses() && $this->whenPasses() && $this->eventsPasses();
         } catch (Exception | Throwable $e) {
             $this->markAsFailed($e->getMessage());
+
+            app(ResolveGarbageAction::class)->handle($this);
 
             return false;
         }
@@ -479,5 +467,17 @@ class MailatorSchedule extends Model
         $this->save();
 
         return $this;
+    }
+
+    public function failedLastTimes(int $times): bool
+    {
+        return $this
+            ->logs()
+            ->latest()
+            ->take($times)
+            ->get()
+            ->filter
+            ->isFailed()
+            ->count() === $times;
     }
 }

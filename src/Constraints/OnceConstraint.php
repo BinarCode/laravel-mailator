@@ -10,7 +10,7 @@ class OnceConstraint implements SendScheduleConstraint
     public function canSend(MailatorSchedule $schedule, Collection $logs): bool
     {
         return $schedule->isOnce()
-            ? $logs->count() === 0
+            ? is_null($schedule->last_sent_at)
             : true;
     }
 }

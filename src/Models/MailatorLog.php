@@ -43,4 +43,9 @@ class MailatorLog extends Model
     {
         return $this->status === static::STATUS_SENT;
     }
+
+    public function isFailed(): bool
+    {
+        return $this->status === static::STATUS_FAILED;
+    }
 }
