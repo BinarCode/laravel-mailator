@@ -32,7 +32,7 @@ class GarbageCollectorCommand extends Command
                 }
             });
 
-        if (! $dry = $this->option('dry')) {
+        if (! $this->option('dry')) {
             $ids->each(fn ($i) => $this->info('Scheduler id to complete: '.$i));
         }
 

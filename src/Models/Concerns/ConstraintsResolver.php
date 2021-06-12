@@ -56,7 +56,7 @@ trait ConstraintsResolver
         return collect($this->constraints)
             ->map(fn (string $event) => unserialize($event))
             ->filter(fn ($event) => is_subclass_of($event, Descriptionable::class))
-            ->reduce(function ($base, Descriable $descriable) {
+            ->reduce(function ($base, Descriptionable $descriable) {
                 return array_merge($base, $descriable::conditions());
             }, []);
     }

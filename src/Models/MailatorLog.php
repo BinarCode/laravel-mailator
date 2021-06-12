@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class MailatorLog
+ * @property string $status
  * @property Carbon $created_at
  * @package Binarcode\LaravelMailator\Models
  */
@@ -17,8 +18,8 @@ class MailatorLog extends Model
         return config('mailator.logs_table', 'mailator_logs');
     }
 
-    const STATUS_FAILED = 'failed';
-    const STATUS_SENT = 'sent';
+    public const STATUS_FAILED = 'failed';
+    public const STATUS_SENT = 'sent';
 
     protected $fillable = [
         'name',

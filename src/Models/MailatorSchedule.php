@@ -256,12 +256,12 @@ class MailatorSchedule extends Model
     {
         //let's say we have 1 day and 2 hours till day job ends
         //so we will floor it to 1, and will send the reminder in time
-        return floor($this->delay_minutes / static::MINUTES_IN_DAY);
+        return (int) floor($this->delay_minutes / static::MINUTES_IN_DAY);
     }
 
     public function toHours(): int
     {
-        return floor($this->delay_minutes / static::MINUTES_IN_HOUR);
+        return (int) floor($this->delay_minutes / static::MINUTES_IN_HOUR);
     }
 
     public function minutes(int $number): self
@@ -449,7 +449,7 @@ class MailatorSchedule extends Model
     public function getReadableConditionAttribute(): string
     {
         if ($this->isManual()) {
-            return __('manual');
+            return (string) __('manual');
         }
 
         $condition = $this->toDays().' day(s)';
