@@ -325,6 +325,15 @@ class MailatorSchedule extends Model
         }
     }
 
+    public function executeWhenPasses(bool $now = false): void
+    {
+        $this->save();
+
+        if ($this->shouldSend()) {
+            $this->execute($now);
+        }
+    }
+
     public function execute(bool $now = false): void
     {
         $this->save();
