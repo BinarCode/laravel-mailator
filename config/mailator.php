@@ -26,6 +26,11 @@ return [
         > The email sender class. It will be executed from the sender job.
          */
         'send_mail_action' => Binarcode\LaravelMailator\Actions\SendMailAction::class,
+
+        /**
+         * Class that will mark the scheduled action as being completed so the action will do not be counted into the next iteration.
+         */
+        'garbage_resolver' => Binarcode\LaravelMailator\Actions\ResolveGarbageAction::class,
     ],
 
     'log_model' => Binarcode\LaravelMailator\Models\MailatorLog::class,

@@ -15,7 +15,7 @@ class SerializedConditionCondition implements SendScheduleConstraint
         $this->user = $user;
     }
 
-    public function canSend(MailatorSchedule $mailatorSchedule, Collection $logs): bool
+    public function canSend(MailatorSchedule $schedule, Collection $logs): bool
     {
         return $this->user->email === 'john.doe@binarcode.com';
     }

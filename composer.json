@@ -54,7 +54,7 @@
                 "Binarcode\\LaravelMailator\\LaravelMailatorServiceProvider"
             ],
             "aliases": {
-                "LaravelMailator": "Binarcode\\LaravelMailator\\LaravelMailatorFacade"
+                "LaravelMailator": "Mailator"
             }
         }
     }

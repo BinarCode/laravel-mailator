@@ -2,6 +2,12 @@
 
 All notable changes to `laravel-mailator` will be documented in this file
 
+## 3.0.0 - 2021-06-08
+
+- `actionClass` from MailatorScheduler now accept an instance of `Binarcode\LaravelMailator\Actions\Action`  
+- `toDays()` helper added to MailatorScheduler
+- `tags()` added to MailatorScheduler
+
 ## 2.0.0 - 2021-08-03
 
 - The `before` and `after` methods now accept only an instance of Carbon 

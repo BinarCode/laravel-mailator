@@ -5,12 +5,12 @@ namespace Binarcode\LaravelMailator\Constraints;
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use Illuminate\Support\Collection;
 
-class OnceConstraint implements SendScheduleConstraint
+class ManualConstraint implements SendScheduleConstraint
 {
     public function canSend(MailatorSchedule $schedule, Collection $logs): bool
     {
-        return $schedule->isOnce()
-            ? is_null($schedule->last_sent_at)
+        return $schedule->isManual()
+            ? false
             : true;
     }
 }

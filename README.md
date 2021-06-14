@@ -3,6 +3,7 @@
 <p align="center">
 <a href="https://github.com/binarcode/laravel-mailator"><img src="https://github.com/binarcode/laravel-mailator/workflows/Tests/badge.svg" alt="Build Status"></a>
 <a href="https://github.com/binarcode/laravel-mailator"><img src="https://poser.pugx.org/binarcode/laravel-mailator/v" alt="Latest Stable Version."></a>
+<a href="https://packagist.org/packages/binarcode/laravel-mailator"><img src="https://img.shields.io/packagist/dt/binarcode/laravel-mailator" alt="Total Downloads"></a>
 <a href="https://packagist.org/packages/binarcode/laravel-mailator"><img src="https://poser.pugx.org/binarcode/laravel-mailator/license" alt="License"></a>
 </p>
 

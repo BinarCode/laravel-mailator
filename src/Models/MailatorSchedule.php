@@ -3,24 +3,33 @@
 namespace Binarcode\LaravelMailator\Models;
 
 use Binarcode\LaravelMailator\Actions\Action;
+use Binarcode\LaravelMailator\Actions\ResolveGarbageAction;
 use Binarcode\LaravelMailator\Constraints\SendScheduleConstraint;
-use Binarcode\LaravelMailator\Exceptions\InstanceException;
 use Binarcode\LaravelMailator\Jobs\SendMailJob;
+use Binarcode\LaravelMailator\Models\Builders\MailatorSchedulerBuilder;
 use Binarcode\LaravelMailator\Models\Concerns\ConstraintsResolver;
+use Binarcode\LaravelMailator\Models\Concerns\HasFuture;
 use Binarcode\LaravelMailator\Models\Concerns\HasTarget;
+use Binarcode\LaravelMailator\Support\ClassResolver;
+use Binarcode\LaravelMailator\Support\ConverterEnum;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Closure;
+use Exception;
 use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Opis\Closure\SerializableClosure;
+use Throwable;
 
 /**
  * Class MailatorSchedule.
  *
+ * @property string tags
+ * @property string name
  * @property string targetable_type
  * @property string targetable_id
  * @property string mailable_class
@@ -31,46 +40,38 @@ use Opis\Closure\SerializableClosure;
  * @property array recipients
  * @property string action
  * @property Closure when
+ * @property Carbon last_failed_at
+ * @property Carbon last_sent_at
+ * @property Carbon completed_at
  * @property string frequency_option
+ * @method static MailatorSchedulerBuilder query()
  */
 class MailatorSchedule extends Model
 {
     use ConstraintsResolver;
     use HasTarget;
+    use HasFuture;
+    use ClassResolver;
 
     public function getTable()
     {
         return config('mailator.schedulers_table_name', 'mailator_schedulers');
     }
 
-    const MINUTES_IN_HOUR = 60;
-    const MINUTES_IN_DAY = 60 * 60;
-    const MINUTES_IN_WEEK = 168 * 60;
-    const HOURS_IN_DAY = 24;
-    const HOURS_IN_WEEK = 168;
+    public const TIME_FRAME_ORIGIN_BEFORE = 'before';
+    public const TIME_FRAME_ORIGIN_AFTER = 'after';
 
-    const FREQUENCY_IN_HOURS = [
-        'single' => PHP_INT_MAX,
-        'hourly' => 1,
-        'daily' => self::HOURS_IN_DAY,
-        'weekly' => self::HOURS_IN_WEEK,
-    ];
-
-    const DELAY_OPTIONS = [
-        '24' => 'Days',
-        '168' => 'Weeks',
-    ];
-
-    const TIME_FRAME_ORIGIN_BEFORE = 'before';
-    const TIME_FRAME_ORIGIN_AFTER = 'after';
-
-    const FREQUENCY_OPTIONS_MANY = 'many';
-    const FREQUENCY_OPTIONS_ONCE = 'once';
-    const FREQUENCY_OPTIONS_HOURLY = 'hourly';
-    const FREQUENCY_OPTIONS_DAILY = 'daily';
-    const FREQUENCY_OPTIONS_WEEKLY = 'weekly';
+    public const FREQUENCY_OPTIONS_MANY = 'many';
+    public const FREQUENCY_OPTIONS_ONCE = 'once';
+    public const FREQUENCY_OPTIONS_HOURLY = 'hourly';
+    public const FREQUENCY_OPTIONS_DAILY = 'daily';
+    public const FREQUENCY_OPTIONS_WEEKLY = 'weekly';
+    public const FREQUENCY_OPTIONS_NEVER = 'never';
+    public const FREQUENCY_OPTIONS_MANUAL = 'manual';
 
     protected $fillable = [
+        'name',
+        'tags',
         'action',
         'recipients',
         'mailable_class',
@@ -82,6 +83,7 @@ class MailatorSchedule extends Model
         'frequency_option',
         'last_sent_at',
         'last_failed_at',
+        'completed_at',
         'failure_reason',
     ];
 
@@ -89,13 +91,16 @@ class MailatorSchedule extends Model
         'constraints' => 'array',
         'recipients' => 'array',
         'timestamp_target' => 'datetime',
+        'last_failed_at' => 'datetime',
+        'last_sent_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'start_at' => 'datetime',
+        'end_at' => 'datetime',
     ];
 
-    protected $dates = [
-        'created_at',
-        'updated_at',
-        'start_at',
-        'end_at',
+    protected $attributes = [
+        'frequency_option' => self::FREQUENCY_OPTIONS_ONCE,
     ];
 
     public static function init(string $name): self
@@ -117,6 +122,24 @@ class MailatorSchedule extends Model
         return $this;
     }
 
+    public function manual(): self
+    {
+        $this->frequency_option = static::FREQUENCY_OPTIONS_MANUAL;
+
+        $this->markComplete();
+
+        return $this;
+    }
+
+    public function never(): self
+    {
+        $this->frequency_option = static::FREQUENCY_OPTIONS_NEVER;
+
+        $this->markComplete();
+
+        return $this;
+    }
+
     public function many(): self
     {
         $this->frequency_option = static::FREQUENCY_OPTIONS_MANY;
@@ -131,14 +154,14 @@ class MailatorSchedule extends Model
         return $this;
     }
 
-    public function daily()
+    public function daily(): static
     {
         $this->frequency_option = static::FREQUENCY_OPTIONS_DAILY;
 
         return $this;
     }
 
-    public function weekly()
+    public function weekly(): static
     {
         $this->frequency_option = static::FREQUENCY_OPTIONS_WEEKLY;
 
@@ -199,6 +222,16 @@ class MailatorSchedule extends Model
         return $this->frequency_option === static::FREQUENCY_OPTIONS_ONCE;
     }
 
+    public function isNever(): bool
+    {
+        return $this->frequency_option === static::FREQUENCY_OPTIONS_NEVER;
+    }
+
+    public function isManual(): bool
+    {
+        return $this->frequency_option === static::FREQUENCY_OPTIONS_MANUAL;
+    }
+
     public function isMany(): bool
     {
         return $this->frequency_option === static::FREQUENCY_OPTIONS_MANY;
@@ -208,7 +241,12 @@ class MailatorSchedule extends Model
     {
         //let's say we have 1 day and 2 hours till day job ends
         //so we will floor it to 1, and will send the reminder in time
-        return floor($this->delay_minutes / static::MINUTES_IN_DAY);
+        return (int) floor($this->delay_minutes / ConverterEnum::MINUTES_IN_DAY);
+    }
+
+    public function toHours(): int
+    {
+        return (int) floor($this->delay_minutes / ConverterEnum::MINUTES_IN_HOUR);
     }
 
     public function minutes(int $number): self
@@ -220,21 +258,21 @@ class MailatorSchedule extends Model
 
     public function hours(int $number): self
     {
-        $this->delay_minutes = $number * static::MINUTES_IN_HOUR;
+        $this->delay_minutes = $number * ConverterEnum::MINUTES_IN_HOUR;
 
         return $this;
     }
 
     public function days(int $number): self
     {
-        $this->delay_minutes = $number * static::MINUTES_IN_DAY;
+        $this->delay_minutes = $number * ConverterEnum::MINUTES_IN_DAY;
 
         return $this;
     }
 
-    public function weeks(int $number)
+    public function weeks(int $number): static
     {
-        $this->delay_minutes = $number * static::MINUTES_IN_WEEK;
+        $this->delay_minutes = $number * ConverterEnum::MINUTES_IN_WEEK;
 
         return $this;
     }
@@ -246,11 +284,13 @@ class MailatorSchedule extends Model
         return $this;
     }
 
-    public function recipients(array $recipients): self
+    public function recipients(...$recipients): self
     {
-        $this->recipients = collect($recipients)
+        $this->recipients = array_merge(collect($recipients)
+            ->flatten()
             ->filter(fn ($email) => $this->ensureValidEmail($email))
-            ->toArray();
+            ->unique()
+            ->toArray(), $this->recipients ?? []);
 
         return $this;
     }
@@ -264,36 +304,71 @@ class MailatorSchedule extends Model
         return $this;
     }
 
-    public function logs()
+    public function logs(): HasMany
     {
         return $this->hasMany(MailatorLog::class, 'mailator_schedule_id');
     }
 
     public function shouldSend(): bool
     {
-        $this->load('logs');
+        try {
+            $this->load('logs');
 
-        return $this->configurationsPasses() && $this->whenPasses() && $this->eventsPasses();
+
+            return $this->configurationsPasses() && $this->whenPasses() && $this->eventsPasses();
+        } catch (Exception | Throwable $e) {
+            $this->markAsFailed($e->getMessage());
+
+            app(ResolveGarbageAction::class)->handle($this);
+
+            return false;
+        }
     }
 
-    public static function run()
+    public function executeWhenPasses(bool $now = false): void
+    {
+        $this->save();
+
+        if ($this->shouldSend()) {
+            $this->execute($now);
+        }
+    }
+
+    public function execute(bool $now = false): void
+    {
+        $this->save();
+
+        try {
+            if ($this->hasCustomAction()) {
+                unserialize($this->action)->handle($this);
+
+                $this->markAsSent();
+
+                static::garbageResolver()->handle($this);
+            } else {
+                if ($now) {
+                    dispatch_sync(new SendMailJob($this));
+                } else {
+                    dispatch(new SendMailJob($this));
+                }
+            }
+        } catch (Exception | Throwable $e) {
+            $this->markAsFailed($e->getMessage());
+        }
+    }
+
+    public static function run(): void
     {
         static::query()
-            ->get()->lazy()
+            ->ready()
+            ->cursor()
             ->filter(fn (self $schedule) => $schedule->shouldSend())
-            ->filter(fn (self $schedule) => $schedule->hasCustomAction())
-            ->each(fn (self $schedule) => app($schedule->action)->handle($schedule));
-
-        static::query()
-            ->get()->lazy()
-            ->filter(fn (self $schedule) => $schedule->shouldSend())
-            ->filter(fn (self $schedule) => ! $schedule->hasCustomAction())
-            ->each(fn (self $schedule) => dispatch(new SendMailJob($schedule)));
+            ->each(fn (self $schedule) => $schedule->execute());
     }
 
     public function hasCustomAction(): bool
     {
-        return ! is_null($this->action) && is_subclass_of($this->action, Action::class);
+        return ! is_null($this->action);
     }
 
     public function getMailable(): Mailable
@@ -351,14 +426,67 @@ class MailatorSchedule extends Model
         )->fails();
     }
 
-    public function actionClass(string $action): self
+    public function actionClass(Action $action): self
     {
-        if (! is_subclass_of($action, Action::class)) {
-            throw InstanceException::throw(Action::class);
-        }
-
-        $this->action = $action;
+        $this->action = serialize($action);
 
         return $this;
+    }
+
+    public function tag(string | array $tag): self
+    {
+        if (is_array($tag)) {
+            $tag = implode(',', $tag);
+        }
+
+        $this->tags = $tag;
+
+        return $this;
+    }
+
+    public function getReadableConditionAttribute(): string
+    {
+        if ($this->isManual()) {
+            return (string) __('manual');
+        }
+
+        $condition = $this->toDays().' day(s)';
+
+        if ($this->toDays() < 1) {
+            $condition = $this->toHours().' hour(s) ';
+        }
+
+        if ($this->toHours() < 1) {
+            $condition = $this->delay_minutes.' minute(s) ';
+        }
+
+        $condition .= $this->time_frame_origin." ".$this->timestamp_target?->copy()->format('m/d/Y h:i A');
+
+        return $condition;
+    }
+
+    public function newEloquentBuilder($query): MailatorSchedulerBuilder
+    {
+        return new MailatorSchedulerBuilder($query);
+    }
+
+    public function markComplete(): self
+    {
+        $this->completed_at = now();
+        $this->save();
+
+        return $this;
+    }
+
+    public function failedLastTimes(int $times): bool
+    {
+        return $this
+            ->logs()
+            ->latest()
+            ->take($times)
+            ->get()
+            ->filter
+            ->isFailed()
+            ->count() === $times;
     }
 }

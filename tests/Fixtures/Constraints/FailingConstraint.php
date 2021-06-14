@@ -1,15 +1,15 @@
 <?php
 
-namespace Binarcode\LaravelMailator\Tests\Fixtures;
+namespace Binarcode\LaravelMailator\Tests\Fixtures\Constraints;
 
 use Binarcode\LaravelMailator\Constraints\SendScheduleConstraint;
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use Illuminate\Support\Collection;
 
-class SingleSendingCondition implements SendScheduleConstraint
+class FailingConstraint implements SendScheduleConstraint
 {
     public function canSend(MailatorSchedule $schedule, Collection $logs): bool
     {
-        return $_SERVER['can_send'];
+        abort(403, 'Some failing.');
     }
 }

@@ -14,6 +14,7 @@ class CreateMailatorTables extends Migration
             $table->bigIncrements('id');
 
             $table->string('name', 100)->nullable();
+            $table->string('tags', 100)->nullable();
             $table->text('mailable_class')->nullable();
             $table->nullableMorphs('targetable');
             $table->text('action')->nullable();
@@ -30,6 +31,7 @@ class CreateMailatorTables extends Migration
 
             $table->timestamp('last_sent_at')->nullable();
             $table->timestamp('last_failed_at')->nullable();
+            $table->timestamp('completed_at')->nullable();
             $table->text('failure_reason')->nullable();
             $table->timestamps();
         });

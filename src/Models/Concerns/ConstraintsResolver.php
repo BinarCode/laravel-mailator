@@ -6,7 +6,10 @@ namespace Binarcode\LaravelMailator\Models\Concerns;
 use Binarcode\LaravelMailator\Constraints\AfterConstraint;
 use Binarcode\LaravelMailator\Constraints\BeforeConstraint;
 use Binarcode\LaravelMailator\Constraints\DailyConstraint;
+use Binarcode\LaravelMailator\Constraints\Descriptionable;
+use Binarcode\LaravelMailator\Constraints\ManualConstraint;
 use Binarcode\LaravelMailator\Constraints\ManyConstraint;
+use Binarcode\LaravelMailator\Constraints\NeverConstraint;
 use Binarcode\LaravelMailator\Constraints\OnceConstraint;
 use Binarcode\LaravelMailator\Constraints\SendScheduleConstraint;
 use Binarcode\LaravelMailator\Constraints\WeeklyConstraint;
@@ -24,6 +27,8 @@ trait ConstraintsResolver
         return collect([
             BeforeConstraint::class,
             AfterConstraint::class,
+            NeverConstraint::class,
+            ManualConstraint::class,
             OnceConstraint::class,
             ManyConstraint::class,
             DailyConstraint::class,
@@ -44,5 +49,15 @@ trait ConstraintsResolver
             ->map(fn (string $event) => unserialize($event))
             ->filter(fn ($event) => is_subclass_of($event, SendScheduleConstraint::class))
             ->every(fn (SendScheduleConstraint $event) => $event->canSend($this, $this->logs));
+    }
+
+    public function constraintsDescriptions(): array
+    {
+        return collect($this->constraints)
+            ->map(fn (string $event) => unserialize($event))
+            ->filter(fn ($event) => is_subclass_of($event, Descriptionable::class))
+            ->reduce(function ($base, Descriptionable $descriable) {
+                return array_merge($base, $descriable::conditions());
+            }, []);
     }
 }
