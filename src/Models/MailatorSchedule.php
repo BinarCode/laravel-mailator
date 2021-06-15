@@ -97,6 +97,7 @@ class MailatorSchedule extends Model
         'updated_at' => 'datetime',
         'start_at' => 'datetime',
         'end_at' => 'datetime',
+        'completed_at' => 'datetime',
     ];
 
     protected $attributes = [
