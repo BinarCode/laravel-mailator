@@ -20,6 +20,7 @@ use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Opis\Closure\SerializableClosure;
@@ -380,7 +381,8 @@ class MailatorSchedule extends Model
     {
         $this->logs()
             ->create([
-//                'recipients' => $this->getRecipients(),
+                'recipients' => $this->getRecipients()->toJson(),
+                'name' => $this->name,
                 'status' => MailatorLog::STATUS_SENT,
                 'action_at' => now(),
                 'created_at' => now(),
@@ -396,6 +398,8 @@ class MailatorSchedule extends Model
     public function markAsFailed(string $failureReason): self
     {
         $this->logs()->create([
+            'recipients' => $this->getRecipients()->toJson(),
+            'name' => $this->name,
             'status' => MailatorLog::STATUS_FAILED,
             'action_at' => now(),
             'created_at' => now(),
@@ -411,11 +415,10 @@ class MailatorSchedule extends Model
         return $this;
     }
 
-    public function getRecipients(): array
+    public function getRecipients(): \Collection
     {
         return collect($this->recipients)
-            ->filter(fn ($email) => $this->ensureValidEmail($email))
-            ->toArray();
+            ->filter(fn ($email) => $this->ensureValidEmail($email));
     }
 
     protected function ensureValidEmail(string $email): bool
