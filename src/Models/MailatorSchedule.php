@@ -381,7 +381,7 @@ class MailatorSchedule extends Model
     {
         $this->logs()
             ->create([
-                'recipients' => json_encode($this->getRecipients()),
+                'recipients' => $this->getRecipients(),
                 'name' => $this->name,
                 'status' => MailatorLog::STATUS_SENT,
                 'action_at' => now(),
@@ -398,7 +398,7 @@ class MailatorSchedule extends Model
     public function markAsFailed(string $failureReason): self
     {
         $this->logs()->create([
-            'recipients' => json_encode($this->getRecipients()),
+            'recipients' => $this->getRecipients(),
             'name' => $this->name,
             'status' => MailatorLog::STATUS_FAILED,
             'action_at' => now(),
@@ -418,7 +418,8 @@ class MailatorSchedule extends Model
     public function getRecipients(): array
     {
         return collect($this->recipients)
-            ->filter(fn ($email) => $this->ensureValidEmail($email));
+            ->filter(fn ($email) => $this->ensureValidEmail($email))
+            ->toArray();
     }
 
     protected function ensureValidEmail(string $email): bool
