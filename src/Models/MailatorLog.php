@@ -2,10 +2,6 @@
 
 namespace Binarcode\LaravelMailator\Models;
 
-use Binarcode\LaravelMailator\Models\Concerns\ConstraintsResolver;
-use Binarcode\LaravelMailator\Models\Concerns\HasFuture;
-use Binarcode\LaravelMailator\Models\Concerns\HasTarget;
-use Binarcode\LaravelMailator\Support\ClassResolver;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 

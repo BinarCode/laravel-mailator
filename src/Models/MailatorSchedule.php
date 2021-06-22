@@ -20,7 +20,6 @@ use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Opis\Closure\SerializableClosure;
