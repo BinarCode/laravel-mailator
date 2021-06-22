@@ -2,6 +2,10 @@
 
 namespace Binarcode\LaravelMailator\Models;
 
+use Binarcode\LaravelMailator\Models\Concerns\ConstraintsResolver;
+use Binarcode\LaravelMailator\Models\Concerns\HasFuture;
+use Binarcode\LaravelMailator\Models\Concerns\HasTarget;
+use Binarcode\LaravelMailator\Support\ClassResolver;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
@@ -9,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  * Class MailatorLog
  * @property string $status
  * @property Carbon $created_at
+ * @property array recipients
  * @package Binarcode\LaravelMailator\Models
  */
 class MailatorLog extends Model
@@ -32,7 +37,7 @@ class MailatorLog extends Model
         'updated_at',
     ];
 
-    protected $cast = [
+    protected $casts = [
         'action_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
