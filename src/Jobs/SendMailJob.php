@@ -29,7 +29,7 @@ class SendMailJob implements ShouldQueue
     {
         $this->schedule = $schedule;
 
-        $this->queue = config('mailator.send_mail_job_queue', 'default');
+        $this->queue = config('mailator.scheduler.send_mail_job_queue', 'default');
     }
 
     public function handle()
