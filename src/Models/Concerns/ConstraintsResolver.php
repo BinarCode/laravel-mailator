@@ -14,6 +14,7 @@ use Binarcode\LaravelMailator\Constraints\OnceConstraint;
 use Binarcode\LaravelMailator\Constraints\SendScheduleConstraint;
 use Binarcode\LaravelMailator\Constraints\WeeklyConstraint;
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
+use Throwable;
 
 /**
  * Trait ConstraintsResolver
@@ -53,22 +54,34 @@ trait ConstraintsResolver
 
     public function constraintsDescriptions(): array
     {
-        return collect($this->constraints)
-            ->map(fn (string $event) => unserialize($event))
-            ->filter(fn ($event) => is_subclass_of($event, Descriptionable::class))
-            ->reduce(function ($base, Descriptionable $descriable) {
-                return array_merge($base, $descriable::conditions());
-            }, []);
+        try {
+            return collect($this->constraints)
+                ->map(fn(string $event) => unserialize($event))
+                ->filter(fn($event) => is_subclass_of($event, Descriptionable::class))
+                ->reduce(function ($base, Descriptionable $descriable) {
+                    return array_merge($base, $descriable::conditions());
+                }, []);
+        } catch (Throwable $e) {
+            $this->markAsFailed($e->getMessage());
+
+            return [];
+        }
     }
 
     public function constraintsNotSatisfiedDescriptions(): array
     {
-        return collect($this->constraints)
-            ->map(fn (string $event) => unserialize($event))
-            ->filter(fn ($event) => is_subclass_of($event, Descriptionable::class))
-            ->filter(fn ($event) => ! $event->canSend($this, $this->logs))
-            ->reduce(function ($base, Descriptionable $descriable) {
-                return array_merge($base, $descriable::conditions());
-            }, []);
+        try {
+            return collect($this->constraints)
+                ->map(fn(string $event) => unserialize($event))
+                ->filter(fn($event) => is_subclass_of($event, Descriptionable::class))
+                ->filter(fn($event) => !$event->canSend($this, $this->logs))
+                ->reduce(function ($base, Descriptionable $descriable) {
+                    return array_merge($base, $descriable::conditions());
+                }, []);
+        } catch (Throwable $e) {
+            $this->markAsFailed($e->getMessage());
+
+            return [];
+        }
     }
 }

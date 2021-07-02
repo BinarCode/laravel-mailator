@@ -35,7 +35,7 @@ class ResolveGarbageAction implements Action
             return true;
         }
 
-        if ($schedule->failedLastTimes(3)) {
+        if ($schedule->failedLastTimes(config('mailator.scheduler.mark_complete_after_fails_count', 3))) {
             return true;
         }
 
