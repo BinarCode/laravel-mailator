@@ -13,8 +13,7 @@ class InvoiceReminderMailable extends Mailable
 
     public function __construct(
         private ?User $user = null,
-    )
-    {
+    ) {
     }
 
     public function build()
