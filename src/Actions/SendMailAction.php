@@ -6,6 +6,7 @@ use Binarcode\LaravelMailator\Events\ScheduleMailSentEvent;
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use Binarcode\LaravelMailator\Support\ClassResolver;
 use Exception;
+use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Support\Facades\Mail;
 
 class SendMailAction implements Action
@@ -28,12 +29,14 @@ class SendMailAction implements Action
     protected function sendMail(MailatorSchedule $schedule)
     {
         //todo - apply replacers for variables maybe
-        Mail::to($schedule->getRecipients())->send(
-            $schedule->getMailable()
-        );
+        $mailable = $schedule->getMailable();
 
-        $schedule->markAsSent();
+        if ($mailable instanceof Mailable) {
+            Mail::to($schedule->getRecipients())->send($mailable);
 
-        event(new ScheduleMailSentEvent($schedule));
+            $schedule->markAsSent();
+
+            event(new ScheduleMailSentEvent($schedule));
+        }
     }
 }

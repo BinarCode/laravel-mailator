@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Opis\Closure\SerializableClosure;
 use Throwable;
+use TypeError;
 
 /**
  * Class MailatorSchedule.
@@ -289,7 +290,7 @@ class MailatorSchedule extends Model
     {
         $this->recipients = array_merge(collect($recipients)
             ->flatten()
-            ->filter(fn ($email) => $this->ensureValidEmail($email))
+            ->filter(fn($email) => $this->ensureValidEmail($email))
             ->unique()
             ->toArray(), $this->recipients ?? []);
 
@@ -363,18 +364,24 @@ class MailatorSchedule extends Model
         static::query()
             ->ready()
             ->cursor()
-            ->filter(fn (self $schedule) => $schedule->shouldSend())
-            ->each(fn (self $schedule) => $schedule->execute());
+            ->filter(fn(self $schedule) => $schedule->shouldSend())
+            ->each(fn(self $schedule) => $schedule->execute());
     }
 
     public function hasCustomAction(): bool
     {
-        return ! is_null($this->action);
+        return !is_null($this->action);
     }
 
-    public function getMailable(): Mailable
+    public function getMailable(): ?Mailable
     {
-        return unserialize($this->mailable_class);
+        try {
+            return unserialize($this->mailable_class);
+        } catch (Throwable | TypeError $e) {
+            $this->markAsFailed($e->getMessage());
+        }
+
+        return null;
     }
 
     public function markAsSent(): self
@@ -418,13 +425,13 @@ class MailatorSchedule extends Model
     public function getRecipients(): array
     {
         return collect($this->recipients)
-            ->filter(fn ($email) => $this->ensureValidEmail($email))
+            ->filter(fn($email) => $this->ensureValidEmail($email))
             ->toArray();
     }
 
     protected function ensureValidEmail(string $email): bool
     {
-        return ! Validator::make(
+        return !Validator::make(
             compact('email'),
             ['email' => 'required|email']
         )->fails();
@@ -437,7 +444,7 @@ class MailatorSchedule extends Model
         return $this;
     }
 
-    public function tag(string | array $tag): self
+    public function tag(string|array $tag): self
     {
         if (is_array($tag)) {
             $tag = implode(',', $tag);
@@ -485,12 +492,12 @@ class MailatorSchedule extends Model
     public function failedLastTimes(int $times): bool
     {
         return $this
-            ->logs()
-            ->latest()
-            ->take($times)
-            ->get()
-            ->filter
-            ->isFailed()
-            ->count() === $times;
+                ->logs()
+                ->latest()
+                ->take($times)
+                ->get()
+                ->filter
+                ->isFailed()
+                ->count() === $times;
     }
 }

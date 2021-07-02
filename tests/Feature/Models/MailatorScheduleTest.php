@@ -5,6 +5,7 @@ namespace Binarcode\LaravelMailator\Tests\Feature\Models;
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use Binarcode\LaravelMailator\Tests\database\Factories\UserFactory;
 use Binarcode\LaravelMailator\Tests\Fixtures\InvoiceReminderMailable;
+use Binarcode\LaravelMailator\Tests\Fixtures\User;
 use Binarcode\LaravelMailator\Tests\TestCase;
 use Illuminate\Support\Facades\Mail;
 use Spatie\TestTime\TestTime;
@@ -113,5 +114,31 @@ class MailatorScheduleTest extends TestCase
         $scheduler->recipients($mail3 = 'too@bar.com');
 
         self::assertSame([$mail3, $mail2, $mail], $scheduler->recipients);
+    }
+
+    public function test_unserialized_exception_store_exception_log(): void
+    {
+        Mail::fake();
+        Mail::assertNothingSent();
+
+        $scheduler = MailatorSchedule::init('Invoice reminder.')
+            ->recipients([
+                'zoo@bar.com',
+            ])
+            ->mailable(
+                (new InvoiceReminderMailable($user = User::factory()->create()))->to('foo@bar.com')
+            )
+            ->days(1)
+            ->after(now()->addDays(7));
+
+        $scheduler->save();
+
+        $user->forceDelete();
+
+        $this->assertCount(0, $scheduler->logs);
+
+        $scheduler->getMailable();
+
+        $this->assertCount(1, $scheduler->logs()->get());
     }
 }
