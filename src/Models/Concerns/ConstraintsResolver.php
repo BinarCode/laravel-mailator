@@ -47,9 +47,9 @@ trait ConstraintsResolver
     public function eventsPasses(): bool
     {
         return collect($this->constraints)
-            ->map(fn (string $event) => unserialize($event))
-            ->filter(fn ($event) => is_subclass_of($event, SendScheduleConstraint::class))
-            ->every(fn (SendScheduleConstraint $event) => $event->canSend($this, $this->logs));
+                ->map(fn (string $event) => unserialize($event))
+                ->filter(fn ($event) => is_subclass_of($event, SendScheduleConstraint::class))
+                ->filter(fn (SendScheduleConstraint $event) => $event->canSend($this, $this->logs))->count() === collect($this->constraints)->count();
     }
 
     public function constraintsDescriptions(): array
