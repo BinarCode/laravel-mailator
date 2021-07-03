@@ -2,7 +2,6 @@
 
 namespace Binarcode\LaravelMailator\Jobs;
 
-use Binarcode\LaravelMailator\Actions\SendMailAction;
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use Binarcode\LaravelMailator\Support\ClassResolver;
 use Illuminate\Bus\Queueable;
@@ -10,7 +9,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Config;
 
 class SendMailJob implements ShouldQueue
 {
