@@ -15,7 +15,9 @@ class ResolveGarbageAction implements Action
 
     public function shouldMarkComplete(MailatorSchedule $schedule): bool
     {
-        if ($schedule->isOnce() && $schedule->fresh()->last_sent_at) {
+        $sentOnce = $schedule->fresh()->wasSentOnce();
+
+        if ($schedule->isOnce() && $sentOnce) {
             return true;
         }
 

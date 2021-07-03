@@ -529,4 +529,9 @@ class MailatorSchedule extends Model
     {
         return ! $this->isOnce();
     }
+
+    public function wasSentOnce(): bool
+    {
+        return !is_null($this->last_sent_at);
+    }
 }
