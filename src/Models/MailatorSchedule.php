@@ -524,4 +524,9 @@ class MailatorSchedule extends Model
     {
         return $this->timestamp_target?->clone();
     }
+
+    public function isRepetitive(): bool
+    {
+        return ! $this->isOnce();
+    }
 }

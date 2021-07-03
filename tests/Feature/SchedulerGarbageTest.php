@@ -81,7 +81,7 @@ class SchedulerGarbageTest extends TestCase
         );
     }
 
-    public function test_marked_completed_when_passed_time(): void
+    public function test_after_marked_completed_when_passed_time(): void
     {
         $scheduler = MailatorSchedule::init('test')
             ->days(1)
@@ -94,13 +94,37 @@ class SchedulerGarbageTest extends TestCase
         $this->assertFalse(
             $scheduler->fresh()->isCompleted()
         );
-//
-//        $this->travel(2)->days();
-//
-//        app(ResolveGarbageAction::class)->handle($scheduler);
-//
-//        $this->assertTrue(
-//            $scheduler->fresh()->isCompleted()
-//        );
+
+        $this->travel(2)->days();
+
+        app(ResolveGarbageAction::class)->handle($scheduler);
+
+        $this->assertTrue(
+            $scheduler->fresh()->isCompleted()
+        );
+    }
+
+    public function test_before_marked_completed_when_passed_time(): void
+    {
+        $scheduler = MailatorSchedule::init('test')
+            ->days(1)
+            ->once()
+            ->before(now()->addDays(10));
+
+        $scheduler->save();
+
+        app(ResolveGarbageAction::class)->handle($scheduler);
+
+        $this->assertFalse(
+            $scheduler->fresh()->isCompleted()
+        );
+
+        $this->travel(10)->days();
+
+        app(ResolveGarbageAction::class)->handle($scheduler);
+
+        $this->assertTrue(
+            $scheduler->fresh()->isCompleted()
+        );
     }
 }

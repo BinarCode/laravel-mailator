@@ -46,7 +46,11 @@ trait HasFuture
         }
 
         if ($this->isBefore()) {
-            return $this->triggerTarget()->lt(now());
+            if ($this->isRepetitive()) {
+                return true;
+            }
+
+            return now()->lt($this->triggerTarget());
         }
 
         return false;
