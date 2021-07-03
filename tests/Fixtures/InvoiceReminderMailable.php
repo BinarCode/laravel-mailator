@@ -26,7 +26,7 @@ class InvoiceReminderMailable extends Mailable implements Constraintable
     public function constraints(): array
     {
         return [
-            new DynamicContraint
+            new DynamicContraint,
         ];
     }
 }
