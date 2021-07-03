@@ -103,8 +103,8 @@ class MailatorSchedule extends Model
     {
         if ($mailable instanceof Constraintable) {
             collect($mailable->constraints())
-                ->filter(fn($constraint) => $constraint instanceof SendScheduleConstraint)
-                ->each(fn(SendScheduleConstraint $constraint) => $this->constraint($constraint));
+                ->filter(fn ($constraint) => $constraint instanceof SendScheduleConstraint)
+                ->each(fn (SendScheduleConstraint $constraint) => $this->constraint($constraint));
         }
 
         $this->mailable_class = serialize($mailable);
