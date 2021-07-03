@@ -5,6 +5,8 @@ namespace Binarcode\LaravelMailator\Models;
 use Binarcode\LaravelMailator\Actions\Action;
 use Binarcode\LaravelMailator\Actions\ResolveGarbageAction;
 use Binarcode\LaravelMailator\Actions\RunSchedulersAction;
+use Binarcode\LaravelMailator\Constraints\Constraintable;
+use Binarcode\LaravelMailator\Constraints\ConstraintsCollection;
 use Binarcode\LaravelMailator\Constraints\SendScheduleConstraint;
 use Binarcode\LaravelMailator\Jobs\SendMailJob;
 use Binarcode\LaravelMailator\Models\Builders\MailatorSchedulerBuilder;
@@ -99,6 +101,12 @@ class MailatorSchedule extends Model
 
     public function mailable(Mailable $mailable): self
     {
+        if ($mailable instanceof Constraintable) {
+            collect($mailable->constraints())
+                ->filter(fn($constraint) => $constraint instanceof SendScheduleConstraint)
+                ->each(fn(SendScheduleConstraint $constraint) => $this->constraint($constraint));
+        }
+
         $this->mailable_class = serialize($mailable);
 
         return $this;
@@ -533,5 +541,10 @@ class MailatorSchedule extends Model
     public function wasSentOnce(): bool
     {
         return !is_null($this->last_sent_at);
+    }
+
+    public function getConstraints(): ConstraintsCollection
+    {
+        return ConstraintsCollection::make($this->constraints);
     }
 }
