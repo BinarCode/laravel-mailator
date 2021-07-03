@@ -2,8 +2,6 @@
 
 namespace Binarcode\LaravelMailator\Models\Concerns;
 
-use Binarcode\LaravelMailator\Constraints\AfterConstraint;
-use Binarcode\LaravelMailator\Constraints\BeforeConstraint;
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use Carbon\CarbonInterface;
 
@@ -16,7 +14,7 @@ trait HasFuture
 {
     public function nextTrigger(): ?CarbonInterface
     {
-        if (!$this->isFutureAction()) {
+        if (! $this->isFutureAction()) {
             return null;
         }
 
@@ -59,11 +57,11 @@ trait HasFuture
         }
 
         if ($this->isAfter()) {
-           return $this->resolveAfterTriggerTime();
+            return $this->resolveAfterTriggerTime();
         }
 
         if ($this->isBefore()) {
-          return $this->resolveBeforeTriggerTime();
+            return $this->resolveBeforeTriggerTime();
         }
 
         return null;

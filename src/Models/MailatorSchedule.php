@@ -295,7 +295,7 @@ class MailatorSchedule extends Model
     {
         $this->recipients = array_merge(collect($recipients)
             ->flatten()
-            ->filter(fn($email) => $this->ensureValidEmail($email))
+            ->filter(fn ($email) => $this->ensureValidEmail($email))
             ->unique()
             ->toArray(), $this->recipients ?? []);
 
@@ -384,7 +384,7 @@ class MailatorSchedule extends Model
 
     public function hasCustomAction(): bool
     {
-        return !is_null($this->action);
+        return ! is_null($this->action);
     }
 
     public function getMailable(): ?Mailable
@@ -439,13 +439,13 @@ class MailatorSchedule extends Model
     public function getRecipients(): array
     {
         return collect($this->recipients)
-            ->filter(fn($email) => $this->ensureValidEmail($email))
+            ->filter(fn ($email) => $this->ensureValidEmail($email))
             ->toArray();
     }
 
     protected function ensureValidEmail(string $email): bool
     {
-        return !Validator::make(
+        return ! Validator::make(
             compact('email'),
             ['email' => 'required|email']
         )->fails();
@@ -458,7 +458,7 @@ class MailatorSchedule extends Model
         return $this;
     }
 
-    public function tag(string|array $tag): self
+    public function tag(string | array $tag): self
     {
         if (is_array($tag)) {
             $tag = implode(',', $tag);
@@ -505,7 +505,7 @@ class MailatorSchedule extends Model
 
     public function isCompleted(): bool
     {
-        return !is_null($this->completed_at);
+        return ! is_null($this->completed_at);
     }
 
     public function failedLastTimes(int $times): bool

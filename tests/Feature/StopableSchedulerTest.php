@@ -56,6 +56,5 @@ class StopableSchedulerTest extends TestCase
 
         Scheduler::run();
         Mail::assertSent(InvoiceReminderMailable::class, 2);
-
     }
 }
