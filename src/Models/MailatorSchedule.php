@@ -540,7 +540,7 @@ class MailatorSchedule extends Model
 
     public function wasSentOnce(): bool
     {
-        return !is_null($this->last_sent_at);
+        return ! is_null($this->last_sent_at);
     }
 
     public function getConstraints(): ConstraintsCollection
