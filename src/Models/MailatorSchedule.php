@@ -4,6 +4,7 @@ namespace Binarcode\LaravelMailator\Models;
 
 use Binarcode\LaravelMailator\Actions\Action;
 use Binarcode\LaravelMailator\Actions\ResolveGarbageAction;
+use Binarcode\LaravelMailator\Actions\RunSchedulersAction;
 use Binarcode\LaravelMailator\Constraints\SendScheduleConstraint;
 use Binarcode\LaravelMailator\Jobs\SendMailJob;
 use Binarcode\LaravelMailator\Models\Builders\MailatorSchedulerBuilder;
@@ -31,6 +32,7 @@ use TypeError;
  *
  * @property string tags
  * @property string name
+ * @property string stopable
  * @property string targetable_type
  * @property string targetable_id
  * @property string mailable_class
@@ -70,23 +72,7 @@ class MailatorSchedule extends Model
     public const FREQUENCY_OPTIONS_NEVER = 'never';
     public const FREQUENCY_OPTIONS_MANUAL = 'manual';
 
-    protected $fillable = [
-        'name',
-        'tags',
-        'action',
-        'recipients',
-        'mailable_class',
-        'delay_minutes',
-        'time_frame_origin',
-        'timestamp_target',
-        'constraints',
-        'when',
-        'frequency_option',
-        'last_sent_at',
-        'last_failed_at',
-        'completed_at',
-        'failure_reason',
-    ];
+    protected $guarded = [];
 
     protected $casts = [
         'constraints' => 'array',
@@ -99,6 +85,7 @@ class MailatorSchedule extends Model
         'start_at' => 'datetime',
         'end_at' => 'datetime',
         'completed_at' => 'datetime',
+        'stopable' => 'boolean',
     ];
 
     protected $attributes = [
@@ -114,6 +101,12 @@ class MailatorSchedule extends Model
     {
         $this->mailable_class = serialize($mailable);
 
+        return $this;
+    }
+
+    public function times(int $count): self
+    {
+        // todo
         return $this;
     }
 
@@ -168,6 +161,18 @@ class MailatorSchedule extends Model
         $this->frequency_option = static::FREQUENCY_OPTIONS_WEEKLY;
 
         return $this;
+    }
+
+    public function stopable(bool $stopable = true): self
+    {
+        $this->stopable = $stopable;
+
+        return $this;
+    }
+
+    public function isStopable(): bool
+    {
+        return (bool) $this->stopable;
     }
 
     public function after(CarbonInterface $date = null): self
@@ -290,7 +295,7 @@ class MailatorSchedule extends Model
     {
         $this->recipients = array_merge(collect($recipients)
             ->flatten()
-            ->filter(fn ($email) => $this->ensureValidEmail($email))
+            ->filter(fn($email) => $this->ensureValidEmail($email))
             ->unique()
             ->toArray(), $this->recipients ?? []);
 
@@ -316,8 +321,21 @@ class MailatorSchedule extends Model
         try {
             $this->load('logs');
 
+            if (! $this->configurationsPasses()) {
+                return false;
+            }
 
-            return $this->configurationsPasses() && $this->whenPasses() && $this->eventsPasses();
+            if (! $this->whenPasses()) {
+                return false;
+            }
+
+            if (! $this->eventsPasses()) {
+                $this->markComplete();
+
+                return false;
+            }
+
+            return true;
         } catch (Exception | Throwable $e) {
             $this->markAsFailed($e->getMessage());
 
@@ -361,16 +379,12 @@ class MailatorSchedule extends Model
 
     public static function run(): void
     {
-        static::query()
-            ->ready()
-            ->cursor()
-            ->filter(fn (self $schedule) => $schedule->shouldSend())
-            ->each(fn (self $schedule) => $schedule->execute());
+        app(RunSchedulersAction::class)();
     }
 
     public function hasCustomAction(): bool
     {
-        return ! is_null($this->action);
+        return !is_null($this->action);
     }
 
     public function getMailable(): ?Mailable
@@ -425,13 +439,13 @@ class MailatorSchedule extends Model
     public function getRecipients(): array
     {
         return collect($this->recipients)
-            ->filter(fn ($email) => $this->ensureValidEmail($email))
+            ->filter(fn($email) => $this->ensureValidEmail($email))
             ->toArray();
     }
 
     protected function ensureValidEmail(string $email): bool
     {
-        return ! Validator::make(
+        return !Validator::make(
             compact('email'),
             ['email' => 'required|email']
         )->fails();
@@ -444,7 +458,7 @@ class MailatorSchedule extends Model
         return $this;
     }
 
-    public function tag(string | array $tag): self
+    public function tag(string|array $tag): self
     {
         if (is_array($tag)) {
             $tag = implode(',', $tag);
@@ -489,6 +503,11 @@ class MailatorSchedule extends Model
         return $this;
     }
 
+    public function isCompleted(): bool
+    {
+        return !is_null($this->completed_at);
+    }
+
     public function failedLastTimes(int $times): bool
     {
         return $this
@@ -499,5 +518,10 @@ class MailatorSchedule extends Model
                 ->filter
                 ->isFailed()
                 ->count() === $times;
+    }
+
+    public function timestampTarget(): ?CarbonInterface
+    {
+        return $this->timestamp_target?->clone();
     }
 }

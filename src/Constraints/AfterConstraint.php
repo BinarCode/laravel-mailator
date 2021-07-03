@@ -18,7 +18,7 @@ class AfterConstraint implements SendScheduleConstraint
         }
 
         if ($schedule->toDays() > 0) {
-            if (now()->lt($schedule->timestamp_target->clone()->addDays($schedule->toDays()))) {
+            if (now()->lt($schedule->timestampTarget()->addDays($schedule->toDays()))) {
                 return false;
             }
 
@@ -28,7 +28,7 @@ class AfterConstraint implements SendScheduleConstraint
         }
 
         if ($schedule->toHours() > 0) {
-            if (now()->lt($schedule->timestamp_target->clone()->addHours($schedule->toHours()))) {
+            if (now()->lt($schedule->timestampTarget()->addHours($schedule->toHours()))) {
                 return false;
             }
 
@@ -38,7 +38,7 @@ class AfterConstraint implements SendScheduleConstraint
                 : $schedule->timestamp_target->diffInHours(now()) > $schedule->toHours();
         }
 
-        if (now()->lt($schedule->timestamp_target->clone()->addMinutes($schedule->delay_minutes))) {
+        if (now()->lt($schedule->timestampTarget()->addMinutes($schedule->delay_minutes))) {
             return false;
         }
 

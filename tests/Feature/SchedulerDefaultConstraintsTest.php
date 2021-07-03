@@ -183,18 +183,18 @@ class SchedulerDefaultConstraintsTest extends TestCase
         MailatorSchedule::run();
         Mail::assertNothingSent();
 
-        TestTime::addDays(8);
+        $this->travel(8)->days();
         MailatorSchedule::run();
         MailatorSchedule::run();
 
         Mail::assertSent(InvoiceReminderMailable::class, 1);
 
         // After 1 day it will not send it.
-        TestTime::addDay();
+        $this->travel(1)->days();
         MailatorSchedule::run();
         Mail::assertSent(InvoiceReminderMailable::class, 1);
 
-        TestTime::addDays(6);
+        $this->travel(6)->days();
         MailatorSchedule::run();
         MailatorSchedule::run();
 

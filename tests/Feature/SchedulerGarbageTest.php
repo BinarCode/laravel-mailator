@@ -2,6 +2,7 @@
 
 namespace Binarcode\LaravelMailator\Tests\Feature;
 
+use Binarcode\LaravelMailator\Actions\ResolveGarbageAction;
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use Binarcode\LaravelMailator\Tests\Fixtures\Actions\NoopAction;
 use Binarcode\LaravelMailator\Tests\Fixtures\Constraints\FailingConstraint;
@@ -78,5 +79,28 @@ class SchedulerGarbageTest extends TestCase
                 ->ready()
                 ->get()
         );
+    }
+
+    public function test_marked_completed_when_passed_time(): void
+    {
+        $scheduler = MailatorSchedule::init('test')
+            ->days(1)
+            ->after(now());
+
+        $scheduler->save();
+
+        app(ResolveGarbageAction::class)->handle($scheduler);
+
+        $this->assertFalse(
+            $scheduler->fresh()->isCompleted()
+        );
+//
+//        $this->travel(2)->days();
+//
+//        app(ResolveGarbageAction::class)->handle($scheduler);
+//
+//        $this->assertTrue(
+//            $scheduler->fresh()->isCompleted()
+//        );
     }
 }

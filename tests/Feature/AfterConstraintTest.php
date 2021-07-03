@@ -20,22 +20,22 @@ class AfterConstraintTest extends TestCase
             ->mailable(
                 (new InvoiceReminderMailable())->to('foo@bar.com')
             )
-            ->days(2)
+            ->days(3)
             ->after(now()->subDay());
 
         $scheduler->save();
 
         $this->travel(1)->days();
 
-        $can = app(
-            AfterConstraint::class
-        )->canSend(
-            $scheduler,
-            $scheduler->logs
-        );
-
         self::assertTrue(
             $scheduler->fresh()->isFutureAction()
+        );
+
+        $this->travel(1)->days();
+
+        $can = app(AfterConstraint::class)->canSend(
+            $scheduler,
+            $scheduler->logs
         );
 
         self::assertTrue(
@@ -53,10 +53,16 @@ class AfterConstraintTest extends TestCase
             ->mailable(
                 (new InvoiceReminderMailable())->to('foo@bar.com')
             )
-            ->hours(2)
+            ->hours(3)
             ->after(now()->subHours(1));
 
         $scheduler->save();
+
+        $this->travel(1)->hours();
+
+        self::assertTrue(
+            $scheduler->fresh()->isFutureAction()
+        );
 
         $this->travel(1)->hours();
 
@@ -65,10 +71,6 @@ class AfterConstraintTest extends TestCase
         )->canSend(
             $scheduler,
             $scheduler->logs
-        );
-
-        self::assertTrue(
-            $scheduler->fresh()->isFutureAction()
         );
 
         self::assertTrue(
