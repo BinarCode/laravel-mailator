@@ -186,6 +186,25 @@ class BeforeInvoiceExpiresConstraint implements SendScheduleConstraint
 }
 ```
 
+### Constraintable
+
+Instead of defining the `constraint` from the mail definition, sometimes it could be more readable if you define it directly into the `mailable` class: 
+
+```php
+use Binarcode\LaravelMailator\Constraints\Constraintable;
+
+class InvoiceReminderMailable extends Mailable implements Constraintable
+{
+    public function constraints(): array
+    {
+        return [
+            new DynamicContraint
+        ];
+    }
+}
+
+```
+
 ### Action
 
 Using `Scheduler` you can even define your custom action:
