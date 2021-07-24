@@ -493,6 +493,10 @@ class MailatorSchedule extends Model
             $condition = $this->delay_minutes.' minute(s) ';
         }
 
+        if ($this->delay_minutes < 1) {
+            return (string) __('immediate');
+        }
+
         $condition .= $this->time_frame_origin." ".$this->timestamp_target?->copy()->format('m/d/Y h:i A');
 
         return $condition;
