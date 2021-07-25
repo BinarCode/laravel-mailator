@@ -15,6 +15,7 @@ class CreateMailatorTables extends Migration
 
             $table->string('name', 100)->nullable();
             $table->boolean('stopable')->default(false);
+            $table->boolean('unique')->default(false);
             $table->string('tags', 100)->nullable();
             $table->text('mailable_class')->nullable();
             $table->nullableMorphs('targetable');

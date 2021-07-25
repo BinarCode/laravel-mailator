@@ -2,6 +2,7 @@
 
 namespace Binarcode\LaravelMailator\Models;
 
+use App\Domains\ResultDocuments\Models\ResultDocument;
 use Binarcode\LaravelMailator\Actions\Action;
 use Binarcode\LaravelMailator\Actions\ResolveGarbageAction;
 use Binarcode\LaravelMailator\Actions\RunSchedulersAction;
@@ -32,23 +33,24 @@ use TypeError;
 /**
  * Class MailatorSchedule.
  *
- * @property string tags
- * @property string name
- * @property string stopable
- * @property string targetable_type
- * @property string targetable_id
- * @property string mailable_class
- * @property string delay_minutes
- * @property string time_frame_origin
- * @property array constraints
- * @property Carbon timestamp_target
- * @property array recipients
- * @property string action
- * @property Closure when
- * @property Carbon last_failed_at
- * @property Carbon last_sent_at
- * @property Carbon completed_at
- * @property string frequency_option
+ * @property string $tags
+ * @property string $name
+ * @property string $stopable
+ * @property string $unique
+ * @property string $targetable_type
+ * @property string $targetable_id
+ * @property string $mailable_class
+ * @property string $delay_minutes
+ * @property string $time_frame_origin
+ * @property array $constraints
+ * @property Carbon $timestamp_target
+ * @property array $recipients
+ * @property string $action
+ * @property Closure $when
+ * @property Carbon $last_failed_at
+ * @property Carbon $last_sent_at
+ * @property Carbon $completed_at
+ * @property string $frequency_option
  * @method static MailatorSchedulerBuilder query()
  */
 class MailatorSchedule extends Model
@@ -88,6 +90,7 @@ class MailatorSchedule extends Model
         'end_at' => 'datetime',
         'completed_at' => 'datetime',
         'stopable' => 'boolean',
+        'unique' => 'boolean',
     ];
 
     protected $attributes = [
@@ -103,8 +106,8 @@ class MailatorSchedule extends Model
     {
         if ($mailable instanceof Constraintable) {
             collect($mailable->constraints())
-                ->filter(fn ($constraint) => $constraint instanceof SendScheduleConstraint)
-                ->each(fn (SendScheduleConstraint $constraint) => $this->constraint($constraint));
+                ->filter(fn($constraint) => $constraint instanceof SendScheduleConstraint)
+                ->each(fn(SendScheduleConstraint $constraint) => $this->constraint($constraint));
         }
 
         $this->mailable_class = serialize($mailable);
@@ -181,6 +184,18 @@ class MailatorSchedule extends Model
     public function isStopable(): bool
     {
         return (bool) $this->stopable;
+    }
+
+    public function unique(): self
+    {
+        $this->unique = true;
+
+        return $this;
+    }
+
+    public function isUnique(): bool
+    {
+        return (bool) $this->unique;
     }
 
     public function after(CarbonInterface $date = null): self
@@ -303,7 +318,7 @@ class MailatorSchedule extends Model
     {
         $this->recipients = array_merge(collect($recipients)
             ->flatten()
-            ->filter(fn ($email) => $this->ensureValidEmail($email))
+            ->filter(fn($email) => $this->ensureValidEmail($email))
             ->unique()
             ->toArray(), $this->recipients ?? []);
 
@@ -329,15 +344,15 @@ class MailatorSchedule extends Model
         try {
             $this->load('logs');
 
-            if (! $this->configurationsPasses()) {
+            if (!$this->configurationsPasses()) {
                 return false;
             }
 
-            if (! $this->whenPasses()) {
+            if (!$this->whenPasses()) {
                 return false;
             }
 
-            if (! $this->eventsPasses()) {
+            if (!$this->eventsPasses()) {
                 if ($this->isStopable()) {
                     $this->markComplete();
                 }
@@ -394,7 +409,7 @@ class MailatorSchedule extends Model
 
     public function hasCustomAction(): bool
     {
-        return ! is_null($this->action);
+        return !is_null($this->action);
     }
 
     public function getMailable(): ?Mailable
@@ -449,13 +464,13 @@ class MailatorSchedule extends Model
     public function getRecipients(): array
     {
         return collect($this->recipients)
-            ->filter(fn ($email) => $this->ensureValidEmail($email))
+            ->filter(fn($email) => $this->ensureValidEmail($email))
             ->toArray();
     }
 
     protected function ensureValidEmail(string $email): bool
     {
-        return ! Validator::make(
+        return !Validator::make(
             compact('email'),
             ['email' => 'required|email']
         )->fails();
@@ -468,7 +483,7 @@ class MailatorSchedule extends Model
         return $this;
     }
 
-    public function tag(string | array $tag): self
+    public function tag(string|array $tag): self
     {
         if (is_array($tag)) {
             $tag = implode(',', $tag);
@@ -519,7 +534,7 @@ class MailatorSchedule extends Model
 
     public function isCompleted(): bool
     {
-        return ! is_null($this->completed_at);
+        return !is_null($this->completed_at);
     }
 
     public function failedLastTimes(int $times): bool
@@ -541,16 +556,36 @@ class MailatorSchedule extends Model
 
     public function isRepetitive(): bool
     {
-        return ! $this->isOnce();
+        return !$this->isOnce();
     }
 
     public function wasSentOnce(): bool
     {
-        return ! is_null($this->last_sent_at);
+        return !is_null($this->last_sent_at);
     }
 
     public function getConstraints(): ConstraintsCollection
     {
         return ConstraintsCollection::make($this->constraints);
+    }
+
+    public function save(array $options = [])
+    {
+        if (!$this->isUnique()) {
+            return parent::save($options);
+        }
+
+        $mailable = get_class(unserialize($this->mailable_class));
+
+        $exists = static:: targetableType($this->targetable_type)
+            ->targetableId($this->targetable_id)
+            ->mailableClass($mailable)
+            ->exists();
+
+        if ($exists) {
+            return false;
+        }
+
+        return parent::save($options);
     }
 }

@@ -303,6 +303,32 @@ You can configure your scheduler to be marked as `completed_at` if in the you cu
 
 To do so, you can use the `stopable()` method.
 
+### Unique
+
+You can configure your scheduler to store a unique relationship with the target class for mailable by specifying: 
+
+```php
+->unique()
+```
+
+ie: 
+
+```php
+Scheduler::init()
+    ->mailable(new InvoiceReminderMailable())
+    ->target($user)
+    ->unique()
+    ->save();
+    
+Scheduler::init()
+    ->mailable(new InvoiceReminderMailable())
+    ->target($user)
+    ->unique()
+    ->save();
+```
+
+This will store a single scheduler for the `$user`. 
+
 ## Run
 
 Now you have to run a scheduler command in your Kernel, and call:
