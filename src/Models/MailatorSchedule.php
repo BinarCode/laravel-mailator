@@ -587,7 +587,7 @@ class MailatorSchedule extends Model
             ->targetableId($this->targetable_id)
             ->mailableClass($mailable)
             ->where('name', $this->name)
-            ->when($this->getKey(), function(Builder $q) {
+            ->when($this->getKey(), function (Builder $q) {
                 $q->where($this->getKeyName(), '!=', $this->getKey());
             })
             ->exists();
