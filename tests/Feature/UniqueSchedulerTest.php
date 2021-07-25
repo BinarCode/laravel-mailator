@@ -4,7 +4,6 @@ namespace Binarcode\LaravelMailator\Tests\Feature;
 
 use Binarcode\LaravelMailator\Scheduler;
 use Binarcode\LaravelMailator\Tests\database\Factories\UserFactory;
-use Binarcode\LaravelMailator\Tests\Fixtures\Constraints\DynamicContraint;
 use Binarcode\LaravelMailator\Tests\Fixtures\InvoiceReminderMailable;
 use Binarcode\LaravelMailator\Tests\TestCase;
 use Illuminate\Support\Facades\Mail;
