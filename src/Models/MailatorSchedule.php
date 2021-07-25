@@ -338,7 +338,9 @@ class MailatorSchedule extends Model
             }
 
             if (! $this->eventsPasses()) {
-                $this->markComplete();
+                if ($this->isStopable()) {
+                    $this->markComplete();
+                }
 
                 return false;
             }

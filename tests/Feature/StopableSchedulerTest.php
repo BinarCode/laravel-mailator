@@ -14,7 +14,7 @@ class StopableSchedulerTest extends TestCase
     {
         Mail::fake();
 
-        $invoiceExpiration = now()->days(10);
+        $invoiceExpiration = now()->addDays(10);
 
         Mail::assertNothingSent();
 
@@ -32,7 +32,7 @@ class StopableSchedulerTest extends TestCase
 
         Mail::assertNothingSent();
 
-        $this->travel(3)->days();
+        $this->travel(4)->days();
 
         Scheduler::run();
         Mail::assertSent(InvoiceReminderMailable::class, 1);
