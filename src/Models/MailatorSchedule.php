@@ -46,7 +46,7 @@ use TypeError;
  * @property Carbon $timestamp_target
  * @property array $recipients
  * @property string $action
- * @property Closure $when
+ * @property Closure|string $when
  * @property Carbon $last_failed_at
  * @property Carbon $last_sent_at
  * @property Carbon $completed_at
