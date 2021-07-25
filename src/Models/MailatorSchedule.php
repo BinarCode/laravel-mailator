@@ -20,6 +20,7 @@ use Carbon\CarbonInterface;
 use Closure;
 use Exception;
 use Illuminate\Contracts\Mail\Mailable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
@@ -373,10 +374,6 @@ class MailatorSchedule extends Model
 
     public function executeWhenPasses(bool $now = false): void
     {
-        if (! $this->save()) {
-            return;
-        }
-
         if ($this->shouldSend()) {
             $this->execute($now);
         }
@@ -586,6 +583,9 @@ class MailatorSchedule extends Model
             ->targetableId($this->targetable_id)
             ->mailableClass($mailable)
             ->where('name', $this->name)
+            ->when($this->getKey(), function(Builder $q) {
+                $q->where($this->getKeyName(), '!=', $this->getKey());
+            })
             ->exists();
 
         if ($exists) {
