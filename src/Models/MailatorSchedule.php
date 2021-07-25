@@ -577,9 +577,10 @@ class MailatorSchedule extends Model
 
         $mailable = get_class(unserialize($this->mailable_class));
 
-        $exists = static:: targetableType($this->targetable_type)
+        $exists = static::targetableType($this->targetable_type)
             ->targetableId($this->targetable_id)
             ->mailableClass($mailable)
+            ->where('name', $this->name)
             ->exists();
 
         if ($exists) {
