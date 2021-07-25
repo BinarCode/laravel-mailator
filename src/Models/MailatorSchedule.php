@@ -23,6 +23,7 @@ use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Opis\Closure\SerializableClosure;
@@ -34,12 +35,12 @@ use TypeError;
  *
  * @property string $tags
  * @property string $name
- * @property string $stopable
- * @property string $unique
+ * @property bool $stopable
+ * @property bool $unique
  * @property string $targetable_type
  * @property string $targetable_id
  * @property string $mailable_class
- * @property string $delay_minutes
+ * @property numeric $delay_minutes
  * @property string $time_frame_origin
  * @property array $constraints
  * @property Carbon $timestamp_target
@@ -50,6 +51,7 @@ use TypeError;
  * @property Carbon $last_sent_at
  * @property Carbon $completed_at
  * @property string $frequency_option
+ * @property-read Collection $logs
  * @method static MailatorSchedulerBuilder query()
  */
 class MailatorSchedule extends Model
