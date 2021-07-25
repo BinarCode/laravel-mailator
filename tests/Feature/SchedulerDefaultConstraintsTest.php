@@ -107,7 +107,7 @@ class SchedulerDefaultConstraintsTest extends TestCase
             )
             ->many()
             ->constraint(
-                new SerializedConditionCondition(new User([
+                new SerializedConditionCondition(User::create([
                     'email' => 'john.doe@binarcode.com',
                 ]))
             );
