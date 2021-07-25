@@ -38,4 +38,28 @@ class UniqueSchedulerTest extends TestCase
 
         self::assertCount(2, $user->schedulers()->get());
     }
+
+    public function test_second_unique_doesnt_send_when_execute(): void
+    {
+        Mail::fake();
+        $user = UserFactory::one();
+
+        Mail::assertNothingSent();
+
+        Scheduler::init()
+            ->mailable(new InvoiceReminderMailable())
+            ->target($user)
+            ->unique()
+            ->execute(true);
+
+        Mail::assertSent(InvoiceReminderMailable::class, 1);
+
+        Scheduler::init()
+            ->mailable(new InvoiceReminderMailable())
+            ->target($user)
+            ->unique()
+            ->execute(true);
+
+        Mail::assertSent(InvoiceReminderMailable::class, 1);
+    }
 }
