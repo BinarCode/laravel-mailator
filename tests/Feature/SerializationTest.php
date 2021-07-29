@@ -8,7 +8,6 @@ use Binarcode\LaravelMailator\Tests\Fixtures\Post;
 use Binarcode\LaravelMailator\Tests\Fixtures\SerializedConditionCondition;
 use Binarcode\LaravelMailator\Tests\Fixtures\User;
 use Binarcode\LaravelMailator\Tests\TestCase;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Mail;
 
 class SerializationTest extends TestCase
@@ -20,8 +19,9 @@ class SerializationTest extends TestCase
 
         $user = User::factory()->has(
             Post::factory()->state([
-                'title' => 'Test title'
-            ]), 'posts'
+                'title' => 'Test title',
+            ]),
+            'posts'
         )->create([
             'email' => 'john.doe@binarcode.com',
         ]);
@@ -50,5 +50,4 @@ class SerializationTest extends TestCase
 
         Mail::assertSent(InvoiceReminderMailable::class, 1);
     }
-
 }
