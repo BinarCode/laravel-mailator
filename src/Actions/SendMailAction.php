@@ -2,6 +2,8 @@
 
 namespace Binarcode\LaravelMailator\Actions;
 
+use Binarcode\LaravelMailator\Contracts\Afterable;
+use Binarcode\LaravelMailator\Contracts\Beforeable;
 use Binarcode\LaravelMailator\Events\ScheduleMailSentEvent;
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use Binarcode\LaravelMailator\Support\ClassResolver;
@@ -32,9 +34,17 @@ class SendMailAction implements Action
         $mailable = $schedule->getMailable();
 
         if ($mailable instanceof Mailable) {
+            if ($mailable instanceof Beforeable) {
+                $mailable->before();
+            }
+
             Mail::to($schedule->getRecipients())->send($mailable);
 
             $schedule->markAsSent();
+
+            if ($mailable instanceof Afterable) {
+                $mailable->after();
+            }
 
             event(new ScheduleMailSentEvent($schedule));
         }
