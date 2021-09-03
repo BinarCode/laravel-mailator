@@ -335,7 +335,7 @@ Mailator has few events you can use.
 
 If your mailable class extends the `Binarcode\LaravelMailator\Contracts\Beforable`, you will be able to inject the `before` method, that will be called right before the sending the email. 
 
-If your mailable class extends the `Binarcode\LaravelMailator\Contracts\Afterable`, you will be able to inject the `before` method, that will be called right after the mail has being sent.
+If your mailable class extends the `Binarcode\LaravelMailator\Contracts\Afterable`, you will be able to inject the `after` method, that will be called right after the mail has being sent.
 
 
 And latest, after each mail has being sent, mailator will fire the `Binarcode\LaravelMailator\Events\ScheduleMailSentEvent` event, so you can listen for it.
