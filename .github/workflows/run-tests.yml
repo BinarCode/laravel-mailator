@@ -10,7 +10,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         php: [8.0]
-        laravel: [^8.0]
+        laravel: [^8.0, ^9.0]
         dependency-version: [prefer-stable]
         include:
           - laravel: ^8.0
