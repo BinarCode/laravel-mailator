@@ -53,6 +53,7 @@ use TypeError;
  * @property Carbon $completed_at
  * @property string $frequency_option
  * @property-read Collection $logs
+ *
  * @method static MailatorSchedulerBuilder query()
  */
 class MailatorSchedule extends Model
