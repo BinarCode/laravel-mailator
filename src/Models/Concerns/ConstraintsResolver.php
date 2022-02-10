@@ -74,6 +74,7 @@ trait ConstraintsResolver
             return collect($this->constraints)
                 ->map(fn (string $event) => unserialize($event))
                 ->filter(fn ($event) => is_subclass_of($event, Descriptionable::class))
+                ->filter(fn ($event) => is_subclass_of($event, SendScheduleConstraint::class))
                 ->filter(fn ($event) => ! $event->canSend($this, $this->logs))
                 ->reduce(function ($base, Descriptionable $descriable) {
                     return array_merge($base, $descriable::conditions());

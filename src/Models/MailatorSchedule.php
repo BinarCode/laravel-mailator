@@ -44,7 +44,7 @@ use TypeError;
  * @property string $mailable_class
  * @property numeric $delay_minutes
  * @property string $time_frame_origin
- * @property Arrayable|array $constraints
+ * @property Arrayable<SendScheduleConstraint> $constraints
  * @property Carbon $timestamp_target
  * @property array $recipients
  * @property string $action
