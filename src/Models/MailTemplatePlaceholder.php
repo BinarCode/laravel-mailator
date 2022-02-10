@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class MailTemplate
- * @property string name
- * @property string description
- * @property int mail_template_id
- * @property-read MailTemplate mailTemplate
+ *
+ * @property string $name
+ * @property string $description
+ * @property int $mail_template_id
+ * @property-read MailTemplate $mailTemplate
+ *
  * @package App\Models
  */
 class MailTemplatePlaceholder extends Model

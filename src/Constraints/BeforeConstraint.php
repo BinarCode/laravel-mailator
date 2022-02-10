@@ -18,13 +18,13 @@ class BeforeConstraint implements SendScheduleConstraint
         }
 
         // if already expired
-        if ($schedule->timestamp_target->lte(now())) {
+        if ($schedule->timestamp_target->lte(now()->floorSeconds())) {
             return false;
         }
 
         //till ends we should have at least toDays days
         return $schedule->isOnce()
-            ? $schedule->timestamp_target->diffInDays(now()) === $schedule->toDays()
-            : $schedule->timestamp_target->diffInDays(now()) < $schedule->toDays();
+            ? $schedule->timestamp_target->diffInDays(now()->floorSeconds()) === $schedule->toDays()
+            : $schedule->timestamp_target->diffInDays(now()->floorSeconds()) < $schedule->toDays();
     }
 }

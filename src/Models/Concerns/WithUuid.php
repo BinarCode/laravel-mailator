@@ -6,11 +6,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
+/**
+ * @property string $uuid
+ */
 trait WithUuid
 {
     public static function bootWithUuid()
     {
-        static::creating(function (Model $model) {
+        static::creating(function ($model) {
             if (! $model->uuid) {
                 $model->setAttribute('uuid', Str::uuid());
             }

@@ -18,33 +18,33 @@ class AfterConstraint implements SendScheduleConstraint
         }
 
         if ($schedule->toDays() > 0) {
-            if (now()->lt($schedule->timestampTarget()->addDays($schedule->toDays()))) {
+            if (now()->floorSeconds()->lt($schedule->timestampTarget()->addDays($schedule->toDays()))) {
                 return false;
             }
 
             return $schedule->isOnce()
-                ? $schedule->timestamp_target->diffInDays(now()) === $schedule->toDays()
-                : $schedule->timestamp_target->diffInDays(now()) > $schedule->toDays();
+                ? $schedule->timestamp_target->diffInDays(now()->floorSeconds()) === $schedule->toDays()
+                : $schedule->timestamp_target->diffInDays(now()->floorSeconds()) > $schedule->toDays();
         }
 
         if ($schedule->toHours() > 0) {
-            if (now()->lt($schedule->timestampTarget()->addHours($schedule->toHours()))) {
+            if (now()->floorSeconds()->lt($schedule->timestampTarget()->addHours($schedule->toHours()))) {
                 return false;
             }
 
             //till ends we should have at least toDays days
             return $schedule->isOnce()
-                ? $schedule->timestamp_target->diffInHours(now()) === $schedule->toHours()
-                : $schedule->timestamp_target->diffInHours(now()) > $schedule->toHours();
+                ? $schedule->timestamp_target->diffInHours(now()->floorSeconds()) === $schedule->toHours()
+                : $schedule->timestamp_target->diffInHours(now()->floorSeconds()) > $schedule->toHours();
         }
 
-        if (now()->lt($schedule->timestampTarget()->addMinutes($schedule->delay_minutes))) {
+        if (now()->floorSeconds()->lt($schedule->timestampTarget()->addMinutes($schedule->delay_minutes))) {
             return false;
         }
 
         //till ends we should have at least toDays days
         return $schedule->isOnce()
-            ? $schedule->timestamp_target->diffInHours(now()) === $schedule->delay_minutes
-            : $schedule->timestamp_target->diffInHours(now()) > $schedule->delay_minutes;
+            ? $schedule->timestamp_target->diffInHours(now()->floorSeconds()) === $schedule->delay_minutes
+            : $schedule->timestamp_target->diffInHours(now()->floorSeconds()) > $schedule->delay_minutes;
     }
 }
