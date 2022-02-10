@@ -20,6 +20,7 @@ use Carbon\CarbonInterface;
 use Closure;
 use Exception;
 use Illuminate\Contracts\Mail\Mailable;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -43,7 +44,7 @@ use TypeError;
  * @property string $mailable_class
  * @property numeric $delay_minutes
  * @property string $time_frame_origin
- * @property array $constraints
+ * @property Arrayable|array $constraints
  * @property Carbon $timestamp_target
  * @property array $recipients
  * @property string $action
