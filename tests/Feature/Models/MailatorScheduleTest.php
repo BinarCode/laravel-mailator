@@ -63,7 +63,7 @@ class MailatorScheduleTest extends TestCase
         MailatorSchedule::run();
         Mail::assertNothingSent();
 
-        $this->travelTo(now()->addDays(5));
+        $this->travelTo(now()->addDays(6));
         MailatorSchedule::run();
 
         Mail::assertSent(InvoiceReminderMailable::class, 1);
