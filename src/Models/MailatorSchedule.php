@@ -50,6 +50,7 @@ use TypeError;
  * @property string $action
  * @property Closure|string $when
  * @property Carbon $last_failed_at
+ * @property string $failure_reason
  * @property Carbon $last_sent_at
  * @property Carbon $completed_at
  * @property string $frequency_option

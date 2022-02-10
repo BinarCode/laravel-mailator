@@ -24,13 +24,12 @@
     "require-dev": {
         "brianium/paratest": "^6.2",
         "nunomaduro/collision": "^6.0",
+        "nunomaduro/larastan": "^2.0",
         "orchestra/testbench": "^7.0",
+        "phpstan/extension-installer": "^1.1",
         "phpunit/phpunit": "^9.5",
         "spatie/laravel-ray": "^1.9",
-        "spatie/test-time": "^1.2",
-        "phpstan/extension-installer": "^1.1",
-        "phpstan/phpstan-deprecation-rules": "^1.0",
-        "phpstan/phpstan-phpunit": "^1.0"
+        "spatie/test-time": "^1.2"
     },
     "autoload": {
         "psr-4": {
@@ -48,7 +47,10 @@
         "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "phpstan/extension-installer": true
+        }
     },
     "extra": {
         "laravel": {
