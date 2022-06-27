@@ -38,7 +38,7 @@ class AfterConstraint implements SendScheduleConstraint
                 : $schedule->timestamp_target->diffInHours(now()->floorSeconds()) > $schedule->toHours();
         }
 
-        if (now()->floorSeconds()->lt($schedule->timestampTarget()->addMinutes($schedule->delay_minutes))) {
+        if (now()->floorSeconds()->lte($schedule->timestampTarget()->addMinutes($schedule->delay_minutes))) {
             return false;
         }
 
