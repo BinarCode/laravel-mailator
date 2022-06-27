@@ -2,7 +2,6 @@
 
 namespace Binarcode\LaravelMailator\Tests\Feature;
 
-use Binarcode\LaravelMailator\Constraints\AfterConstraint;
 use Binarcode\LaravelMailator\Constraints\BeforeConstraint;
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use Binarcode\LaravelMailator\Tests\Fixtures\InvoiceReminderMailable;
