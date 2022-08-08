@@ -249,7 +249,7 @@ Mailator provides the `Binarcode\LaravelMailator\Models\Concerns\HasMailatorSche
 By default, scheduler run the action, or send the email only once. You can change that, and use a daily reminder till the constraint returns a truth condition:
 
 ```php
-use Binarcode\LaravelMailator\Scheduler;use Binarcode\LaravelMailator\Tests\Fixtures\InvoiceReminderMailable;
+use Binarcode\LaravelMailator\Scheduler;
 
 // 2021-20-06 - 20 June 2021
 $expirationDate = $invoice->expire_at;
