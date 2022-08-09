@@ -28,79 +28,13 @@ Publish config: `a vendor:publish --tag=mailator-config`
 
 It has mainly 2 directions of usage:
 
-1. Email Templates & Placeholders
+1. Schedule emails sending (or actions triggering)
 
-2. Email Scheduler
-
-## Templating
-
-To create an email template:
-
-``` php
-$template = Binarcode\LaravelMailator\Models\MailTemplate::create([
-    'name' => 'Welcome Email.',
-    'from_email' => 'from@bar.com',
-    'from_name' => 'From Bar',
-    'subject' => 'Welcome to Mailator.',
-    'html' => '<h1>Welcome to the party!</h1>',
-]);
-```
-
-Adding some placeholders with description to this template:
-
-```php
-$template->placeholders()->create(
-    [
-        'name' => '::name::',
-        'description' => 'Name',
-    ],
-);
-```
-
-To use the template, you simply have to add the `WithMailTemplate` trait to your mailable.
-
-This will enforce you to implement the `getReplacers` method, this should return an array of replacers to your template.
-The array may contain instances of `Binarcode\LaravelMailator\Replacers\Replacer` or even `Closure` instances.
-
-Mailator shipes with a builtin replacer `ModelAttributesReplacer`, it will automaticaly replace attributes from the
-model you provide to placeholders.
-
-The last step is how to say to your mailable what template to use. This could be done into the build method as shown
-bellow:
-
-```php
-class WelcomeMailatorMailable extends Mailable
-{
-    use Binarcode\LaravelMailator\Support\WithMailTemplate;
-    
-    private Model $user;
-    
-    public function __construct(Model $user)
-    {
-        $this->user = $user;
-    }
-    
-    public function build()
-    {
-        return $this->template(MailTemplate::firstWhere('name', 'Welcome Email.'));
-    }
-
-    public function getReplacers(): array
-    {
-        return [
-            Binarcode\LaravelMailator\Replacers\ModelAttributesReplacer::makeWithModel($this->user),
-
-            function($html) {
-                //
-            }       
-        ];
-    }
-}
-```
+2. Email Templates & Placeholders
 
 ## Scheduler
 
-To set up a mail to be sent after or before an event, you can do this by using `Scheduler` facade.
+To set up a mail to be sent after or before an event, you can do this by using the `Scheduler` facade.
 
 Firstly lets set up a mail scheduler:
 
@@ -354,6 +288,73 @@ Package provides the `Binarcode\LaravelMailator\Console\MailatorSchedulerCommand
 $schedule->command(MailatorSchedulerCommand::class)->everyThirtyMinutes();
 ```
 
+
+## Templating
+
+To create an email template:
+
+``` php
+$template = Binarcode\LaravelMailator\Models\MailTemplate::create([
+    'name' => 'Welcome Email.',
+    'from_email' => 'from@bar.com',
+    'from_name' => 'From Bar',
+    'subject' => 'Welcome to Mailator.',
+    'html' => '<h1>Welcome to the party!</h1>',
+]);
+```
+
+Adding some placeholders with description to this template:
+
+```php
+$template->placeholders()->create(
+    [
+        'name' => '::name::',
+        'description' => 'Name',
+    ],
+);
+```
+
+To use the template, you simply have to add the `WithMailTemplate` trait to your mailable.
+
+This will enforce you to implement the `getReplacers` method, this should return an array of replacers to your template.
+The array may contain instances of `Binarcode\LaravelMailator\Replacers\Replacer` or even `Closure` instances.
+
+Mailator shipes with a builtin replacer `ModelAttributesReplacer`, it will automaticaly replace attributes from the
+model you provide to placeholders.
+
+The last step is how to say to your mailable what template to use. This could be done into the build method as shown
+bellow:
+
+```php
+class WelcomeMailatorMailable extends Mailable
+{
+    use Binarcode\LaravelMailator\Support\WithMailTemplate;
+    
+    private Model $user;
+    
+    public function __construct(Model $user)
+    {
+        $this->user = $user;
+    }
+    
+    public function build()
+    {
+        return $this->template(MailTemplate::firstWhere('name', 'Welcome Email.'));
+    }
+
+    public function getReplacers(): array
+    {
+        return [
+            Binarcode\LaravelMailator\Replacers\ModelAttributesReplacer::makeWithModel($this->user),
+
+            function($html) {
+                //
+            }       
+        ];
+    }
+}
+```
+
 ### Testing
 
 ``` bash
@@ -381,4 +382,3 @@ tracker.
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
-
