@@ -171,7 +171,7 @@ and then in the `Invoice` model you can get all emails related to it:
 // app/Models/Invoice.php
 public function schedulers() 
 {
-        return $this->morphMany(Binarcode\LaravelMailator\Models\MailatorSchedule::class, 'targetable');
+    return $this->morphMany(Binarcode\LaravelMailator\Models\MailatorSchedule::class, 'targetable');
 }
 ...
 ```
