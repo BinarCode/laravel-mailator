@@ -36,18 +36,18 @@ It has mainly 2 directions of usage:
 
 To set up a mail to be sent after or before an event, you can do this by using the `Scheduler` facade.
 
-Firstly lets set up a mail scheduler:
+Here is an example of how to send the `invoice reminder email` `3 days` before the `$invoice->due_date`:
 
 ```php
 use Binarcode\LaravelMailator\Tests\Fixtures\InvoiceReminderMailable;
 use Binarcode\LaravelMailator\Tests\Fixtures\SerializedConditionCondition;
 
 Binarcode\LaravelMailator\Scheduler::init('Invoice reminder.')
-    ->mailable(new InvoiceReminderMailable())
+    ->mailable(new InvoiceReminderMailable($invoice))
     ->recipients('foo@binarcode.com', 'baz@binarcode.com')
-    ->constraint(new SerializedConditionCondition(User::first()))
-    ->days(1)
-    ->before(now()->addYear())
+    ->constraint(new SerializedConditionCondition($invoice))
+    ->days(3)
+    ->before($invoice->due_date)
     ->save();
 ```
 
