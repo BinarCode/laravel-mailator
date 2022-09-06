@@ -101,7 +101,7 @@ The `after` constraint accept a `CarbonInterface` as well. The difference, is th
 
 ### Constraint
 
-The `contraint()` method accept an instance of `Binarcode\LaravelMailator\Constraints\SendScheduleConstraint`. Each constraint will be called when the scheduler will try to send the email. If all constraints return true, the email will be sent.
+The `constraint()` method accept an instance of `Binarcode\LaravelMailator\Constraints\SendScheduleConstraint`. Each constraint will be called when the scheduler will try to send the email. If all constraints return true, the email will be sent.
 
 The `constraint()` method could be called many times, and each constraint will be stored. 
 
