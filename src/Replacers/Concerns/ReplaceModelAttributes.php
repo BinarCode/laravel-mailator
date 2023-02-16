@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
  * $replaceText => "first_name"
  * $model => {first_name: 'Eduard', ...}
  *
- * @return => "Welcome Eduard"
+ * return => "Welcome Eduard"
  */
 trait ReplaceModelAttributes
 {

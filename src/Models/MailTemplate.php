@@ -4,21 +4,24 @@ namespace Binarcode\LaravelMailator\Models;
 
 use Binarcode\LaravelMailator\Models\Concerns\WithUuid;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Collection;
 use TijsVerkoyen\CssToInlineStyles\CssToInlineStyles;
 
 /**
  * Class MailTemplate
- * @property string name
- * @property string subject
- * @property string from_email
- * @property string from_name
- * @property string html
- * @property string email_html
- * @property string webview_html
- * @property string mailable_class
- * @property string webvimailable_classew_html
+ * @property string $uuid
+ * @property string $name
+ * @property string $subject
+ * @property string $from_email
+ * @property string $from_name
+ * @property string $html
+ * @property string $email_html
+ * @property string $webview_html
+ * @property string $mailable_class
+ * @property string $webvimailable_classew_html
+ * @property-read Collection $placeholders
  * @package App\Models
  */
 class MailTemplate extends Model implements MailTemplateable
@@ -26,6 +29,7 @@ class MailTemplate extends Model implements MailTemplateable
     use WithUuid;
 
     protected $fillable = [
+        'uuid',
         'name',
         'from_email',
         'from_name',
@@ -36,7 +40,7 @@ class MailTemplate extends Model implements MailTemplateable
         'mailable_class',
     ];
 
-    public function placeholders()
+    public function placeholders(): HasMany
     {
         return $this->hasMany(
             config('mailator.templates.placeholder_model') ?? MailTemplatePlaceholder::class,

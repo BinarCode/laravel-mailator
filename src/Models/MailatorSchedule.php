@@ -4,6 +4,9 @@ namespace Binarcode\LaravelMailator\Models;
 
 use Binarcode\LaravelMailator\Actions\Action;
 use Binarcode\LaravelMailator\Actions\ResolveGarbageAction;
+use Binarcode\LaravelMailator\Actions\RunSchedulersAction;
+use Binarcode\LaravelMailator\Constraints\Constraintable;
+use Binarcode\LaravelMailator\Constraints\ConstraintsCollection;
 use Binarcode\LaravelMailator\Constraints\SendScheduleConstraint;
 use Binarcode\LaravelMailator\Jobs\SendMailJob;
 use Binarcode\LaravelMailator\Models\Builders\MailatorSchedulerBuilder;
@@ -17,33 +20,42 @@ use Carbon\CarbonInterface;
 use Closure;
 use Exception;
 use Illuminate\Contracts\Mail\Mailable;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Opis\Closure\SerializableClosure;
 use Throwable;
+use TypeError;
 
 /**
  * Class MailatorSchedule.
  *
- * @property string tags
- * @property string name
- * @property string targetable_type
- * @property string targetable_id
- * @property string mailable_class
- * @property string delay_minutes
- * @property string time_frame_origin
- * @property array constraints
- * @property Carbon timestamp_target
- * @property array recipients
- * @property string action
- * @property Closure when
- * @property Carbon last_failed_at
- * @property Carbon last_sent_at
- * @property Carbon completed_at
- * @property string frequency_option
+ * @property string $tags
+ * @property string $name
+ * @property bool $stopable
+ * @property bool $unique
+ * @property string $targetable_type
+ * @property string $targetable_id
+ * @property string $mailable_class
+ * @property numeric $delay_minutes
+ * @property string $time_frame_origin
+ * @property Arrayable<SendScheduleConstraint> $constraints
+ * @property Carbon $timestamp_target
+ * @property array $recipients
+ * @property string $action
+ * @property Closure|string $when
+ * @property Carbon $last_failed_at
+ * @property string $failure_reason
+ * @property Carbon $last_sent_at
+ * @property Carbon $completed_at
+ * @property string $frequency_option
+ * @property-read Collection $logs
+ *
  * @method static MailatorSchedulerBuilder query()
  */
 class MailatorSchedule extends Model
@@ -69,23 +81,7 @@ class MailatorSchedule extends Model
     public const FREQUENCY_OPTIONS_NEVER = 'never';
     public const FREQUENCY_OPTIONS_MANUAL = 'manual';
 
-    protected $fillable = [
-        'name',
-        'tags',
-        'action',
-        'recipients',
-        'mailable_class',
-        'delay_minutes',
-        'time_frame_origin',
-        'timestamp_target',
-        'constraints',
-        'when',
-        'frequency_option',
-        'last_sent_at',
-        'last_failed_at',
-        'completed_at',
-        'failure_reason',
-    ];
+    protected $guarded = [];
 
     protected $casts = [
         'constraints' => 'array',
@@ -97,6 +93,9 @@ class MailatorSchedule extends Model
         'updated_at' => 'datetime',
         'start_at' => 'datetime',
         'end_at' => 'datetime',
+        'completed_at' => 'datetime',
+        'stopable' => 'boolean',
+        'unique' => 'boolean',
     ];
 
     protected $attributes = [
@@ -110,8 +109,20 @@ class MailatorSchedule extends Model
 
     public function mailable(Mailable $mailable): self
     {
+        if ($mailable instanceof Constraintable) {
+            collect($mailable->constraints())
+                ->filter(fn ($constraint) => $constraint instanceof SendScheduleConstraint)
+                ->each(fn (SendScheduleConstraint $constraint) => $this->constraint($constraint));
+        }
+
         $this->mailable_class = serialize($mailable);
 
+        return $this;
+    }
+
+    public function times(int $count): self
+    {
+        // todo
         return $this;
     }
 
@@ -166,6 +177,30 @@ class MailatorSchedule extends Model
         $this->frequency_option = static::FREQUENCY_OPTIONS_WEEKLY;
 
         return $this;
+    }
+
+    public function stopable(bool $stopable = true): self
+    {
+        $this->stopable = $stopable;
+
+        return $this;
+    }
+
+    public function isStopable(): bool
+    {
+        return (bool) $this->stopable;
+    }
+
+    public function unique(): self
+    {
+        $this->unique = true;
+
+        return $this;
+    }
+
+    public function isUnique(): bool
+    {
+        return (bool) $this->unique;
     }
 
     public function after(CarbonInterface $date = null): self
@@ -314,8 +349,23 @@ class MailatorSchedule extends Model
         try {
             $this->load('logs');
 
+            if (! $this->configurationsPasses()) {
+                return false;
+            }
 
-            return $this->configurationsPasses() && $this->whenPasses() && $this->eventsPasses();
+            if (! $this->whenPasses()) {
+                return false;
+            }
+
+            if (! $this->eventsPasses()) {
+                if ($this->isStopable()) {
+                    $this->markComplete();
+                }
+
+                return false;
+            }
+
+            return true;
         } catch (Exception | Throwable $e) {
             $this->markAsFailed($e->getMessage());
 
@@ -327,7 +377,9 @@ class MailatorSchedule extends Model
 
     public function executeWhenPasses(bool $now = false): void
     {
-        $this->save();
+        if (! $this->save()) {
+            return;
+        }
 
         if ($this->shouldSend()) {
             $this->execute($now);
@@ -336,7 +388,9 @@ class MailatorSchedule extends Model
 
     public function execute(bool $now = false): void
     {
-        $this->save();
+        if (! $this->save()) {
+            return;
+        }
 
         try {
             if ($this->hasCustomAction()) {
@@ -359,11 +413,7 @@ class MailatorSchedule extends Model
 
     public static function run(): void
     {
-        static::query()
-            ->ready()
-            ->cursor()
-            ->filter(fn (self $schedule) => $schedule->shouldSend())
-            ->each(fn (self $schedule) => $schedule->execute());
+        app(RunSchedulersAction::class)();
     }
 
     public function hasCustomAction(): bool
@@ -371,16 +421,23 @@ class MailatorSchedule extends Model
         return ! is_null($this->action);
     }
 
-    public function getMailable(): Mailable
+    public function getMailable(): ?Mailable
     {
-        return unserialize($this->mailable_class);
+        try {
+            return unserialize($this->mailable_class);
+        } catch (Throwable | TypeError $e) {
+            $this->markAsFailed($e->getMessage());
+        }
+
+        return null;
     }
 
     public function markAsSent(): self
     {
         $this->logs()
             ->create([
-//                'recipients' => $this->getRecipients(),
+                'recipients' => $this->getRecipients(),
+                'name' => $this->name,
                 'status' => MailatorLog::STATUS_SENT,
                 'action_at' => now(),
                 'created_at' => now(),
@@ -396,6 +453,8 @@ class MailatorSchedule extends Model
     public function markAsFailed(string $failureReason): self
     {
         $this->logs()->create([
+            'recipients' => $this->getRecipients(),
+            'name' => $this->name,
             'status' => MailatorLog::STATUS_FAILED,
             'action_at' => now(),
             'created_at' => now(),
@@ -460,6 +519,10 @@ class MailatorSchedule extends Model
             $condition = $this->delay_minutes.' minute(s) ';
         }
 
+        if ($this->delay_minutes < 1) {
+            return (string) __('immediate');
+        }
+
         $condition .= $this->time_frame_origin." ".$this->timestamp_target?->copy()->format('m/d/Y h:i A');
 
         return $condition;
@@ -478,15 +541,64 @@ class MailatorSchedule extends Model
         return $this;
     }
 
+    public function isCompleted(): bool
+    {
+        return ! is_null($this->completed_at);
+    }
+
     public function failedLastTimes(int $times): bool
     {
         return $this
-            ->logs()
-            ->latest()
-            ->take($times)
-            ->get()
-            ->filter
-            ->isFailed()
-            ->count() === $times;
+                ->logs()
+                ->latest()
+                ->take($times)
+                ->get()
+                ->filter
+                ->isFailed()
+                ->count() === $times;
+    }
+
+    public function timestampTarget(): ?CarbonInterface
+    {
+        return $this->timestamp_target?->clone();
+    }
+
+    public function isRepetitive(): bool
+    {
+        return ! $this->isOnce();
+    }
+
+    public function wasSentOnce(): bool
+    {
+        return ! is_null($this->last_sent_at);
+    }
+
+    public function getConstraints(): ConstraintsCollection
+    {
+        return ConstraintsCollection::make($this->constraints);
+    }
+
+    public function save(array $options = [])
+    {
+        if (! $this->isUnique()) {
+            return parent::save($options);
+        }
+
+        $mailable = get_class(unserialize($this->mailable_class));
+
+        $exists = static::targetableType($this->targetable_type)
+            ->targetableId($this->targetable_id)
+            ->mailableClass($mailable)
+            ->where('name', $this->name)
+            ->when($this->getKey(), function (Builder $q) {
+                $q->where($this->getKeyName(), '!=', $this->getKey());
+            })
+            ->exists();
+
+        if ($exists) {
+            return false;
+        }
+
+        return parent::save($options);
     }
 }

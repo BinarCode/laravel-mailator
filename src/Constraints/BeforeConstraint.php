@@ -13,18 +13,42 @@ class BeforeConstraint implements SendScheduleConstraint
             return true;
         }
 
-        if (is_null($schedule->timestamp_target)) {
+        if (is_null($schedule->timestampTarget())) {
             return true;
         }
 
         // if already expired
-        if ($schedule->timestamp_target->lte(now())) {
+        if ($schedule->timestampTarget()->lte(now()->floorSeconds())) {
             return false;
         }
 
+        if ($schedule->toDays() > 0) {
+            if (now()->floorSeconds()->gt($schedule->timestampTarget()->addDays($schedule->toDays()))) {
+                return false;
+            }
+
+            //till ends we should have at least toDays days
+            return $schedule->isOnce()
+                ? $schedule->timestampTarget()->diffInDays(now()->floorSeconds()) === $schedule->toDays()
+                : $schedule->timestampTarget()->diffInDays(now()->floorSeconds()) < $schedule->toDays();
+        }
+
+        if ($schedule->toHours() > 0) {
+            if (now()->floorSeconds()->gt($schedule->timestampTarget()->addHours($schedule->toHours()))) {
+                return false;
+            }
+
+            //till ends we should have at least toHours days
+            return $schedule->isOnce()
+                ? $schedule->timestamp_target->diffInHours(now()->floorSeconds()) === $schedule->toHours()
+                : $schedule->timestamp_target->diffInHours(now()->floorSeconds()) < $schedule->toHours();
+        }
+
+
+
         //till ends we should have at least toDays days
         return $schedule->isOnce()
-            ? $schedule->timestamp_target->diffInDays(now()) === $schedule->toDays()
-            : $schedule->timestamp_target->diffInDays(now()) < $schedule->toDays();
+            ? $schedule->timestampTarget()->diffInDays(now()->floorSeconds()) === $schedule->toDays()
+            : $schedule->timestampTarget()->diffInDays(now()->floorSeconds()) < $schedule->toDays();
     }
 }

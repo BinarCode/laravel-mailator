@@ -28,9 +28,266 @@ Publish config: `a vendor:publish --tag=mailator-config`
 
 It has mainly 2 directions of usage:
 
-1. Email Templates & Placeholders
+1. Schedule emails sending (or actions triggering)
 
-2. Email Scheduler
+2. Email Templates & Placeholders
+
+## Scheduler
+
+To set up a mail to be sent after or before an event, you can do this by using the `Scheduler` facade.
+
+Here is an example of how to send the `invoice reminder email` `3 days` before the `$invoice->due_date`:
+
+```php
+use Binarcode\LaravelMailator\Tests\Fixtures\InvoiceReminderMailable;
+use Binarcode\LaravelMailator\Tests\Fixtures\SerializedConditionCondition;
+
+Binarcode\LaravelMailator\Scheduler::init('Invoice reminder.')
+    ->mailable(new InvoiceReminderMailable($invoice))
+    ->recipients('foo@binarcode.com', 'baz@binarcode.com')
+    ->constraint(new SerializedConditionCondition($invoice))
+    ->days(3)
+    ->before($invoice->due_date)
+    ->save();
+```
+
+Let's explain what each line means.
+
+### Mailable
+
+This should be an instance of laravel `Mailable`.
+
+### Recipients
+
+This should be a list or valid emails where the email will be sent.
+
+It could be an array of emails as well.
+
+### Weeks
+
+This should be a number of weeks the email should be delayed. 
+
+### Days
+
+This should be a number of days the email should be delayed. 
+
+### Hours
+
+Instead of `days()` you can use `hours()` as well.
+
+### Minutes
+
+If your scheduler run by minute, you can also use `minutes()` to delay the email.
+
+### Before
+
+The `before` constraint accept a `CarbonInterface` and indicates from when scheduler should start run the mail or action. For instance:
+
+```php
+    ->days(1)
+    ->before(Carbon::make('2021-02-06'))
+```
+
+says, send this email `1 day before 02 June 2021`, so basically the email will be scheduled for `01 June 2021`.
+
+### After
+
+The `after` constraint accept a `CarbonInterface` as well. The difference, is that it inform scheduler to send it `after` the specified timestamp. Say we want to send a survey email `1 week` after the order is placed:
+
+```php
+    ->weeks(1)
+    ->after($order->created_at)
+```
+
+### Constraint
+
+The `constraint()` method accept an instance of `Binarcode\LaravelMailator\Constraints\SendScheduleConstraint`. Each constraint will be called when the scheduler will try to send the email. If all constraints return true, the email will be sent.
+
+The `constraint()` method could be called many times, and each constraint will be stored. 
+
+Since each constraint will be serialized, it's very indicated to use `Illuminate\Queue\SerializesModels` trait, so the serialized models will be loaded properly, and the data stored in your storage system will be much less.
+
+Let's assume we have this `BeforeInvoiceExpiresConstraint` constraint:
+
+```php
+class BeforeInvoiceExpiresConstraint implements SendScheduleConstraint
+{
+    public function canSend(MailatorSchedule $mailatorSchedule, Collection $log): bool
+    {
+        // your conditions
+        return true;
+    }
+}
+```
+
+### Constraintable
+
+Instead of defining the `constraint` from the mail definition, sometimes it could be more readable if you define it directly into the `mailable` class: 
+
+```php
+use Binarcode\LaravelMailator\Constraints\Constraintable;
+
+class InvoiceReminderMailable extends Mailable implements Constraintable
+{
+    public function constraints(): array
+    {
+        return [
+            new DynamicContraint
+        ];
+    }
+}
+
+```
+
+### Action
+
+Using `Scheduler` you can even define your custom action:
+
+```php
+$scheduler = Scheduler::init('Invoice reminder.')
+    ->days(1)
+    ->before(now()->addWeek())
+    ->actionClass(CustomAction::class)
+    ->save();
+```
+
+The `CustomAction` should implement the `Binarcode\LaravelMailator\Actions\Action` class.
+
+### Target
+
+You can link the scheduler with any entity like this:
+
+```php
+        Scheduler::init('Invoice reminder.')
+            ->mailable(new InvoiceReminderMailable())
+            ->days(1)
+            ->target($invoice)
+            ->save();
+```
+
+and then in the `Invoice` model you can get all emails related to it: 
+
+```php
+// app/Models/Invoice.php
+public function schedulers() 
+{
+    return $this->morphMany(Binarcode\LaravelMailator\Models\MailatorSchedule::class, 'targetable');
+}
+...
+```
+
+Mailator provides the `Binarcode\LaravelMailator\Models\Concerns\HasMailatorSchedulers` trait you can put in your Invoice model, so the relations will be loaded.
+
+### Daily
+
+By default, scheduler run the action, or send the email only once. You can change that, and use a daily reminder till the constraint returns a truth condition:
+
+```php
+use Binarcode\LaravelMailator\Scheduler;
+
+// 2021-20-06 - 20 June 2021
+$expirationDate = $invoice->expire_at;
+
+Scheduler::init('Invoice reminder')
+->mailable(new InvoiceReminderMailable())
+->daily()
+->weeks(1)
+->before($expirationDate)
+```
+
+This scheduler will send the `InvoiceReminderMailable` email daily starting with `13 June 2021` (one week before the expiration date).
+
+How to stop the email sending if the invoice was paid meanwhile? Simply adding a constraint that will do not send it: 
+
+```php
+->constraint(new InvoicePaidConstraint($invoice))
+```
+
+and the constraint handle method could be something like this: 
+
+```php
+class InvoicePaidConstraint implements SendScheduleConstraint
+{
+    use SerializesModels;
+    
+    public function __construct(
+        private Invoice $invoice
+    ) { }
+
+    public function canSend(MailatorSchedule $schedule, Collection $logs): bool
+    {
+        return is_null($this->invoice->paid_at);
+    }
+}
+```
+
+## Stop conditions
+
+There are few ways email stop to be sent.
+
+The first condition, is that if for some reason sending email fails 3 times, the `MailatorSchedule` will be marked as `completed_at`. Number of times could be configured in the config file `mailator.scheduler.mark_complete_after_fails_count`.
+
+Any successfully sent mail, that should be sent only once, will be marked as `completed_at`.
+
+
+### Stopable
+
+You can configure your scheduler to be marked as `completed_at` if in the you custom constraint returns a falsy condition. Back to our `InvoiceReminderMailable`, say the invoice expires on `20 June`, we send the first reminder on `13 June`, then the second reminder on `14 June`, if the client pay the invoice on `14 June` the `InvoicePaidConstraint` will return a falsy value, so there is no reason to try to send the invoice reminder on `15 June` again. So the system could mark this scheduler as `completed_at`.
+
+
+To do so, you can use the `stopable()` method.
+
+### Unique
+
+You can configure your scheduler to store a unique relationship with the target class for mailable by specifying: 
+
+```php
+->unique()
+```
+
+ie: 
+
+```php
+Scheduler::init()
+    ->mailable(new InvoiceReminderMailable())
+    ->target($user)
+    ->unique()
+    ->save();
+    
+Scheduler::init()
+    ->mailable(new InvoiceReminderMailable())
+    ->target($user)
+    ->unique()
+    ->save();
+```
+
+This will store a single scheduler for the `$user`. 
+
+## Events
+
+Mailator has few events you can use. 
+
+If your mailable class extends the `Binarcode\LaravelMailator\Contracts\Beforable`, you will be able to inject the `before` method, that will be called right before the sending the email. 
+
+If your mailable class extends the `Binarcode\LaravelMailator\Contracts\Afterable`, you will be able to inject the `after` method, that will be called right after the mail has being sent.
+
+
+And latest, after each mail has being sent, mailator will fire the `Binarcode\LaravelMailator\Events\ScheduleMailSentEvent` event, so you can listen for it.
+
+## Run
+
+Now you have to run a scheduler command in your Kernel, and call:
+
+```php
+Binarcode\LaravelMailator\Scheduler::run();
+```
+
+Package provides the `Binarcode\LaravelMailator\Console\MailatorSchedulerCommand` command you can put in your Console Kernel: 
+
+```php
+$schedule->command(MailatorSchedulerCommand::class)->everyThirtyMinutes();
+```
+
 
 ## Templating
 
@@ -98,86 +355,6 @@ class WelcomeMailatorMailable extends Mailable
 }
 ```
 
-## Scheduler
-
-To setup a mail to be sent after or before an event, you can do this by using `MailatorSchedule`.
-
-Firstly lets setup a mail scheduler:
-
-```php
-use Binarcode\LaravelMailator\Tests\Fixtures\InvoiceReminderMailable;use Binarcode\LaravelMailator\Tests\Fixtures\SerializedConditionCondition;
-
-Binarcode\LaravelMailator\Models\MailatorSchedule::init('Invoice reminder.')
-    ->mailable(new InvoiceReminderMailable())
-    ->recipients(['baz@binarcode.com'])
-    ->days(1)
-    ->constraint(new SerializedConditionCondition)
-    ->before(now()->addYear())
-    ->when(function () {
-        return 'Working.';
-    })
-    ->save();
-```
-
-The `constraint` mutator accept an instance of `Binarcode\LaravelMailator\Constraints\SendScheduleConstraint`, based on
-this the Mailator will decide to send or to not send the email.
-
-Let's assume we have this `BeforeInvoiceExpiresConstraint` constraint:
-
-```php
-class BeforeInvoiceExpiresConstraint implements SendScheduleConstraint
-{
-    public function canSend(MailatorSchedule $mailatorSchedule, Collection $log): bool
-    {
-        // your conditions
-        return true;
-    }
-}
-```
-
-Now you have to run a scheduler command in your Kernel, and call:
-
-```php
-Binarcode\LaravelMailator\Models\MailatorSchedule::run();
-```
-
-The Mailator will take care of all your mails that needs to be sent, and it will send them.
-
-Using `Scheduler` you can even define your custom action:
-
-```php
-$scheduler = MailatorSchedule::init('Invoice reminder.')
-    ->days(1)
-    ->before(now()->addWeek())
-    ->actionClass(CustomAction::class)
-    ->save();
-```
-
-The `CustomAction` should implement the `Binarcode\LaravelMailator\Actions\Action` class.
-
-### Target
-
-You can link the scheduler with any entity like this:
-
-```php
-        MailatorSchedule::init('Invoice reminder.')
-            ->mailable(new InvoiceReminderMailable())
-            ->days(1)
-            ->target($invoice)
-            ->save();
-```
-
-and then in the `Invoice` model you can get all emails related to it: 
-
-```php
-// app/Models/Invoice.php
-public function schedulers() 
-{
-        return $this->morphMany(Binarcode\LaravelMailator\Models\MailatorSchedule::class, 'targetable');
-}
-...
-```
-
 ### Testing
 
 ``` bash
@@ -194,8 +371,7 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ### Security
 
-If you discover any security related issues, please email eduard.lupacescu@binarcode.com instead of using the issue
-tracker.
+If you discover any security related issues, please email eduard.lupacescu@binarcode.com or [message me on twitter](https://twitter.com/LupacescuEuard) instead of using the issue tracker.
 
 ## Credits
 
@@ -205,4 +381,3 @@ tracker.
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
-

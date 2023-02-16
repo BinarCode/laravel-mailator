@@ -6,6 +6,7 @@ use Binarcode\LaravelMailator\Models\Concerns\HasMailatorSchedulers;
 use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Model
 {
@@ -15,4 +16,9 @@ class User extends Model
 
 
     protected $guarded = [];
+
+    public function posts(): HasMany
+    {
+        return $this->hasMany(Post::class);
+    }
 }
