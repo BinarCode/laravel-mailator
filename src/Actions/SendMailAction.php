@@ -2,10 +2,13 @@
 
 namespace Binarcode\LaravelMailator\Actions;
 
+use Binarcode\LaravelMailator\Contracts\Afterable;
+use Binarcode\LaravelMailator\Contracts\Beforeable;
 use Binarcode\LaravelMailator\Events\ScheduleMailSentEvent;
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use Binarcode\LaravelMailator\Support\ClassResolver;
 use Exception;
+use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Support\Facades\Mail;
 
 class SendMailAction implements Action
@@ -28,12 +31,22 @@ class SendMailAction implements Action
     protected function sendMail(MailatorSchedule $schedule)
     {
         //todo - apply replacers for variables maybe
-        Mail::to($schedule->getRecipients())->send(
-            $schedule->getMailable()
-        );
+        $mailable = $schedule->getMailable();
 
-        $schedule->markAsSent();
+        if ($mailable instanceof Mailable) {
+            if ($mailable instanceof Beforeable) {
+                $mailable->before();
+            }
 
-        event(new ScheduleMailSentEvent($schedule));
+            Mail::to($schedule->getRecipients())->send($mailable);
+
+            $schedule->markAsSent();
+
+            if ($mailable instanceof Afterable) {
+                $mailable->after();
+            }
+
+            event(new ScheduleMailSentEvent($schedule));
+        }
     }
 }

@@ -2,15 +2,15 @@
 
 namespace Binarcode\LaravelMailator\Tests\Feature;
 
-use Binarcode\LaravelMailator\Constraints\AfterConstraint;
+use Binarcode\LaravelMailator\Constraints\BeforeConstraint;
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use Binarcode\LaravelMailator\Tests\Fixtures\InvoiceReminderMailable;
 use Binarcode\LaravelMailator\Tests\TestCase;
 use Illuminate\Support\Facades\Mail;
 
-class AfterConstraintTest extends TestCase
+class BeforeConstraintTest extends TestCase
 {
-    public function test_past_target_with_after_now_passed_after_constraint_day_bases(): void
+    public function test_past_target_with_before_now_passed_after_constraint_day_bases(): void
     {
         Mail::fake();
         Mail::assertNothingSent();
@@ -20,20 +20,18 @@ class AfterConstraintTest extends TestCase
             ->mailable(
                 (new InvoiceReminderMailable())->to('foo@bar.com')
             )
-            ->days(3)
-            ->after(now()->subDay());
+            ->days(1)
+            ->before(now()->addDays(2));
 
         $scheduler->save();
 
         $this->travel(1)->days();
 
-        self::assertTrue(
+        self::assertFalse(
             $scheduler->fresh()->isFutureAction()
         );
 
-        $this->travel(1)->days();
-
-        $can = app(AfterConstraint::class)->canSend(
+        $can = app(BeforeConstraint::class)->canSend(
             $scheduler,
             $scheduler->logs
         );
@@ -43,7 +41,7 @@ class AfterConstraintTest extends TestCase
         );
     }
 
-    public function test_past_target_with_after_now_passed_after_constraint_hourly_bases(): void
+    public function test_past_target_with_before_now_passed_after_constraint_hourly_bases(): void
     {
         Mail::fake();
         Mail::assertNothingSent();
@@ -53,21 +51,17 @@ class AfterConstraintTest extends TestCase
             ->mailable(
                 (new InvoiceReminderMailable())->to('foo@bar.com')
             )
-            ->hours(3)
-            ->after(now()->subHours(1));
+            ->hours(1)
+            ->before(now()->addHours(3));
 
         $scheduler->save();
 
         $this->travel(1)->hours();
 
-        self::assertTrue(
-            $scheduler->fresh()->isFutureAction()
-        );
-
         $this->travel(1)->hours();
 
         $can = app(
-            AfterConstraint::class
+            BeforeConstraint::class
         )->canSend(
             $scheduler,
             $scheduler->logs
@@ -80,7 +74,7 @@ class AfterConstraintTest extends TestCase
         $this->travel(1)->hours();
 
         $can = app(
-            AfterConstraint::class
+            BeforeConstraint::class
         )->canSend(
             $scheduler,
             $scheduler->logs

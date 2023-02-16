@@ -15,7 +15,9 @@ class ResolveGarbageAction implements Action
 
     public function shouldMarkComplete(MailatorSchedule $schedule): bool
     {
-        if ($schedule->isOnce() && $schedule->fresh()->last_sent_at) {
+        $sentOnce = $schedule->fresh()->wasSentOnce();
+
+        if ($schedule->isOnce() && $sentOnce) {
             return true;
         }
 
@@ -35,7 +37,7 @@ class ResolveGarbageAction implements Action
             return true;
         }
 
-        if ($schedule->failedLastTimes(3)) {
+        if ($schedule->failedLastTimes(config('mailator.scheduler.mark_complete_after_fails_count', 3))) {
             return true;
         }
 

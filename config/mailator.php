@@ -31,6 +31,11 @@ return [
          * Class that will mark the scheduled action as being completed so the action will do not be counted into the next iteration.
          */
         'garbage_resolver' => Binarcode\LaravelMailator\Actions\ResolveGarbageAction::class,
+
+        /**
+         * Mark action completed after this count of fails.
+         */
+        'mark_complete_after_fails_count' => env('MAILATOR_FAILED_COUNTS', 3),
     ],
 
     'log_model' => Binarcode\LaravelMailator\Models\MailatorLog::class,
