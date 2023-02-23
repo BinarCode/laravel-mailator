@@ -13,11 +13,13 @@ use Binarcode\LaravelMailator\Models\Builders\MailatorSchedulerBuilder;
 use Binarcode\LaravelMailator\Models\Concerns\ConstraintsResolver;
 use Binarcode\LaravelMailator\Models\Concerns\HasFuture;
 use Binarcode\LaravelMailator\Models\Concerns\HasTarget;
+use Binarcode\LaravelMailator\Models\Concerns\WithPrune;
 use Binarcode\LaravelMailator\Support\ClassResolver;
 use Binarcode\LaravelMailator\Support\ConverterEnum;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Closure;
+use DateTimeInterface;
 use Exception;
 use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Contracts\Support\Arrayable;
@@ -64,6 +66,7 @@ class MailatorSchedule extends Model
     use HasTarget;
     use HasFuture;
     use ClassResolver;
+    use WithPrune;
 
     public function getTable()
     {
