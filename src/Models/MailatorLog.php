@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Model;
 class MailatorLog extends Model
 {
     use WithPrune;
+
     public function getTable()
     {
         return config('mailator.logs_table', 'mailator_logs');

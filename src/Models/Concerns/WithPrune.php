@@ -2,11 +2,8 @@
 
 namespace Binarcode\LaravelMailator\Models\Concerns;
 
-use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Query\Builder;
 
 /**
  * @mixin Model

@@ -19,7 +19,6 @@ use Binarcode\LaravelMailator\Support\ConverterEnum;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Closure;
-use DateTimeInterface;
 use Exception;
 use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Contracts\Support\Arrayable;
