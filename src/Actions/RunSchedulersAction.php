@@ -9,7 +9,7 @@ class RunSchedulersAction
 {
     use ClassResolver;
 
-    public function __invoke()
+    public function __invoke(): void
     {
         static::scheduler()::query()
             ->ready()

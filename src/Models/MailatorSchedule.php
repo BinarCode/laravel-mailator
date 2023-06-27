@@ -52,6 +52,7 @@ use TypeError;
  * @property Carbon $last_failed_at
  * @property string $failure_reason
  * @property Carbon $last_sent_at
+ * @property array|null $schedule_at_hours
  * @property Carbon $completed_at
  * @property string $frequency_option
  * @property-read Collection $logs
@@ -86,6 +87,7 @@ class MailatorSchedule extends Model
     protected $casts = [
         'constraints' => 'array',
         'recipients' => 'array',
+        'schedule_at_hours' => 'array',
         'timestamp_target' => 'datetime',
         'last_failed_at' => 'datetime',
         'last_sent_at' => 'datetime',
@@ -111,8 +113,8 @@ class MailatorSchedule extends Model
     {
         if ($mailable instanceof Constraintable) {
             collect($mailable->constraints())
-                ->filter(fn ($constraint) => $constraint instanceof SendScheduleConstraint)
-                ->each(fn (SendScheduleConstraint $constraint) => $this->constraint($constraint));
+                ->filter(fn($constraint) => $constraint instanceof SendScheduleConstraint)
+                ->each(fn(SendScheduleConstraint $constraint) => $this->constraint($constraint));
         }
 
         $this->mailable_class = serialize($mailable);
@@ -242,6 +244,11 @@ class MailatorSchedule extends Model
         return $this->frequency_option === static::FREQUENCY_OPTIONS_WEEKLY;
     }
 
+    public function hasPrecision(): bool
+    {
+        return (bool) $this->schedule_at_hours;
+    }
+
     public function isAfter(): bool
     {
         return $this->time_frame_origin === static::TIME_FRAME_ORIGIN_AFTER;
@@ -305,6 +312,13 @@ class MailatorSchedule extends Model
         return $this;
     }
 
+    public function precision(array $scheduleAtHours): self
+    {
+        $this->schedule_at_hours = $scheduleAtHours;
+
+        return $this;
+    }
+
     public function weeks(int $number): static
     {
         $this->delay_minutes = $number * ConverterEnum::MINUTES_IN_WEEK;
@@ -323,7 +337,7 @@ class MailatorSchedule extends Model
     {
         $this->recipients = array_merge(collect($recipients)
             ->flatten()
-            ->filter(fn ($email) => $this->ensureValidEmail($email))
+            ->filter(fn($email) => $this->ensureValidEmail($email))
             ->unique()
             ->toArray(), $this->recipients ?? []);
 
@@ -349,15 +363,15 @@ class MailatorSchedule extends Model
         try {
             $this->load('logs');
 
-            if (! $this->configurationsPasses()) {
+            if (!$this->configurationsPasses()) {
                 return false;
             }
 
-            if (! $this->whenPasses()) {
+            if (!$this->whenPasses()) {
                 return false;
             }
 
-            if (! $this->eventsPasses()) {
+            if (!$this->eventsPasses()) {
                 if ($this->isStopable()) {
                     $this->markComplete();
                 }
@@ -366,7 +380,7 @@ class MailatorSchedule extends Model
             }
 
             return true;
-        } catch (Exception | Throwable $e) {
+        } catch (Exception|Throwable $e) {
             $this->markAsFailed($e->getMessage());
 
             app(ResolveGarbageAction::class)->handle($this);
@@ -377,7 +391,7 @@ class MailatorSchedule extends Model
 
     public function executeWhenPasses(bool $now = false): void
     {
-        if (! $this->save()) {
+        if (!$this->save()) {
             return;
         }
 
@@ -388,7 +402,7 @@ class MailatorSchedule extends Model
 
     public function execute(bool $now = false): void
     {
-        if (! $this->save()) {
+        if (!$this->save()) {
             return;
         }
 
@@ -406,7 +420,7 @@ class MailatorSchedule extends Model
                     dispatch(new SendMailJob($this));
                 }
             }
-        } catch (Exception | Throwable $e) {
+        } catch (Exception|Throwable $e) {
             $this->markAsFailed($e->getMessage());
         }
     }
@@ -418,14 +432,14 @@ class MailatorSchedule extends Model
 
     public function hasCustomAction(): bool
     {
-        return ! is_null($this->action);
+        return !is_null($this->action);
     }
 
     public function getMailable(): ?Mailable
     {
         try {
             return unserialize($this->mailable_class);
-        } catch (Throwable | TypeError $e) {
+        } catch (Throwable|TypeError $e) {
             $this->markAsFailed($e->getMessage());
         }
 
@@ -473,13 +487,13 @@ class MailatorSchedule extends Model
     public function getRecipients(): array
     {
         return collect($this->recipients)
-            ->filter(fn ($email) => $this->ensureValidEmail($email))
+            ->filter(fn($email) => $this->ensureValidEmail($email))
             ->toArray();
     }
 
     protected function ensureValidEmail(string $email): bool
     {
-        return ! Validator::make(
+        return !Validator::make(
             compact('email'),
             ['email' => 'required|email']
         )->fails();
@@ -492,7 +506,7 @@ class MailatorSchedule extends Model
         return $this;
     }
 
-    public function tag(string | array $tag): self
+    public function tag(string|array $tag): self
     {
         if (is_array($tag)) {
             $tag = implode(',', $tag);
@@ -543,7 +557,7 @@ class MailatorSchedule extends Model
 
     public function isCompleted(): bool
     {
-        return ! is_null($this->completed_at);
+        return !is_null($this->completed_at);
     }
 
     public function failedLastTimes(int $times): bool
@@ -565,12 +579,12 @@ class MailatorSchedule extends Model
 
     public function isRepetitive(): bool
     {
-        return ! $this->isOnce();
+        return !$this->isOnce();
     }
 
     public function wasSentOnce(): bool
     {
-        return ! is_null($this->last_sent_at);
+        return !is_null($this->last_sent_at);
     }
 
     public function getConstraints(): ConstraintsCollection
@@ -580,7 +594,7 @@ class MailatorSchedule extends Model
 
     public function save(array $options = [])
     {
-        if (! $this->isUnique()) {
+        if (!$this->isUnique()) {
             return parent::save($options);
         }
 
