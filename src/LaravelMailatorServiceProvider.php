@@ -4,6 +4,8 @@ namespace Binarcode\LaravelMailator;
 
 use Binarcode\LaravelMailator\Console\Commands\GarbageCollectorCommand;
 use Binarcode\LaravelMailator\Console\Commands\MailatorSchedulerCommand;
+use Binarcode\LaravelMailator\Console\Commands\PruneMailatorLogsCommand;
+use Binarcode\LaravelMailator\Console\Commands\PruneMailatorScheduleCommand;
 use Binarcode\LaravelMailator\Models\MailatorLog;
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use Binarcode\LaravelMailator\Models\MailTemplate;
@@ -48,15 +50,16 @@ class LaravelMailatorServiceProvider extends ServiceProvider
 
             if (! class_exists('CreateMailatorTables')) {
                 $this->publishes([
-                    __DIR__ . '/../database/migrations/create_mailator_tables.php.stub' => database_path('migrations/' . date('Y_m_d_His', time()) . '_create_mailator_tables.php'),
+                    __DIR__ . '/../database/migrations/create_mailator_tables.php.stub' => database_path('migrations/' . date('Y_m_d_His', now()->subMinute(1)->timestamp) . '_create_mailator_tables.php'),
                 ], 'mailator-migrations');
             }
 
-            if (! class_exists('AlterSchedulerAtHoursColumnTables')) {
+            if (! class_exists('AlterMailLogsTableAddCascadeDelete')) {
                 $this->publishes([
-                    __DIR__ . '/../database/migrations/alter_table_mailator_schedule_at_hours_column.php.stub' => database_path('migrations/' . date('Y_m_d_His', time()) . '_alter_table_mailator_schedule_at_hours_column.php'),
+                    __DIR__ . '/../database/migrations/alter_mail_logs_table_add_cascade_delete.php.stub' => database_path('migrations/' . date('Y_m_d_His', now()->timestamp) . '_alter_mail_logs_table_add_cascade_delete.php'),
                 ], 'mailator-migrations');
             }
+
             // Publishing the views.
             $this->publishes([
                 __DIR__.'/../resources/views/publish' => resource_path('views/vendor/laravel-mailator'),
@@ -76,6 +79,8 @@ class LaravelMailatorServiceProvider extends ServiceProvider
             $this->commands([
                  GarbageCollectorCommand::class,
                  MailatorSchedulerCommand::class,
+                 PruneMailatorScheduleCommand::class,
+                 PruneMailatorLogsCommand::class,
              ]);
         }
     }

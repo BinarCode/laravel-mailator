@@ -13,6 +13,7 @@ class RunSchedulersAction
     {
         static::scheduler()::query()
             ->ready()
+            ->with('logs')
             ->cursor()
             ->filter(fn (MailatorSchedule $schedule) => $schedule->shouldSend())
             ->each(fn (MailatorSchedule $schedule) => $schedule->execute());

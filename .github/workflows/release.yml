@@ -1,0 +1,22 @@
+name: Release
+
+on:
+    pull_request:
+        types:
+            - closed
+        branches:
+            - "master"
+
+jobs:
+    release:
+        name: Create release
+        if: github.event.pull_request.merged == true
+        runs-on: "ubuntu-latest"
+        steps:
+            - uses: actions/checkout@v2
+            - uses: ncipollo/release-action@v1
+              with:
+                  name: ${{ github.event.pull_request.title }}
+                  tag: ${{ github.event.pull_request.title }}
+                  body: ${{ github.event.pull_request.body }}
+                  prerelease: false

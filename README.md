@@ -121,7 +121,7 @@ You can continue this pattern to specify the desired hour(s) within the range of
 **Important: When using the precision feature in the Mailator scheduler, it is recommended to set the scheduler to run at intervals that are less than an hour. You can choose intervals such as every 5 minutes, 10 minutes, 30 minutes, or any other desired duration.**
 ### Constraint
 
-The `contraint()` method accept an instance of `Binarcode\LaravelMailator\Constraints\SendScheduleConstraint`. Each constraint will be called when the scheduler will try to send the email. If all constraints return true, the email will be sent.
+The `constraint()` method accept an instance of `Binarcode\LaravelMailator\Constraints\SendScheduleConstraint`. Each constraint will be called when the scheduler will try to send the email. If all constraints return true, the email will be sent.
 
 The `constraint()` method could be called many times, and each constraint will be stored. 
 
