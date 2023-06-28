@@ -37,8 +37,8 @@ trait ConstraintsResolver
             WeeklyConstraint::class,
             HoursSchedulerCheckerConstraint::class,
         ])
-            ->map(fn($class) => app($class))
-            ->every(fn(SendScheduleConstraint $event) => $event->canSend($this, $this->logs));
+            ->map(fn ($class) => app($class))
+            ->every(fn (SendScheduleConstraint $event) => $event->canSend($this, $this->logs));
     }
 
     public function whenPasses(): bool
@@ -49,18 +49,20 @@ trait ConstraintsResolver
     public function eventsPasses(): bool
     {
         return collect($this->constraints)
-                ->map(fn(string $event) => unserialize($event))
-                ->filter(fn($event) => is_subclass_of($event, SendScheduleConstraint::class))
-                ->filter(fn(SendScheduleConstraint $event) => $event->canSend($this,
-                    $this->logs))->count() === collect($this->constraints)->count();
+                ->map(fn (string $event) => unserialize($event))
+                ->filter(fn ($event) => is_subclass_of($event, SendScheduleConstraint::class))
+                ->filter(fn (SendScheduleConstraint $event) => $event->canSend(
+                    $this,
+                    $this->logs
+                ))->count() === collect($this->constraints)->count();
     }
 
     public function constraintsDescriptions(): array
     {
         try {
             return collect($this->constraints)
-                ->map(fn(string $event) => unserialize($event))
-                ->filter(fn($event) => is_subclass_of($event, Descriptionable::class))
+                ->map(fn (string $event) => unserialize($event))
+                ->filter(fn ($event) => is_subclass_of($event, Descriptionable::class))
                 ->reduce(function ($base, Descriptionable $descriable) {
                     return array_merge($base, $descriable::conditions());
                 }, []);
@@ -75,10 +77,10 @@ trait ConstraintsResolver
     {
         try {
             return collect($this->constraints)
-                ->map(fn(string $event) => unserialize($event))
-                ->filter(fn($event) => is_subclass_of($event, Descriptionable::class))
-                ->filter(fn($event) => is_subclass_of($event, SendScheduleConstraint::class))
-                ->filter(fn($event) => !$event->canSend($this, $this->logs))
+                ->map(fn (string $event) => unserialize($event))
+                ->filter(fn ($event) => is_subclass_of($event, Descriptionable::class))
+                ->filter(fn ($event) => is_subclass_of($event, SendScheduleConstraint::class))
+                ->filter(fn ($event) => ! $event->canSend($this, $this->logs))
                 ->reduce(function ($base, Descriptionable $descriable) {
                     return array_merge($base, $descriable::conditions());
                 }, []);
