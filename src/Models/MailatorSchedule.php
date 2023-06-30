@@ -53,6 +53,7 @@ use TypeError;
  * @property Carbon $last_failed_at
  * @property string $failure_reason
  * @property Carbon $last_sent_at
+ * @property array|null $schedule_at_hours
  * @property Carbon $completed_at
  * @property string $frequency_option
  * @property-read Collection $logs
@@ -88,6 +89,7 @@ class MailatorSchedule extends Model
     protected $casts = [
         'constraints' => 'array',
         'recipients' => 'array',
+        'schedule_at_hours' => 'array',
         'timestamp_target' => 'datetime',
         'last_failed_at' => 'datetime',
         'last_sent_at' => 'datetime',
@@ -244,6 +246,11 @@ class MailatorSchedule extends Model
         return $this->frequency_option === static::FREQUENCY_OPTIONS_WEEKLY;
     }
 
+    public function hasPrecision(): bool
+    {
+        return (bool) $this->schedule_at_hours;
+    }
+
     public function isAfter(): bool
     {
         return $this->time_frame_origin === static::TIME_FRAME_ORIGIN_AFTER;
@@ -303,6 +310,13 @@ class MailatorSchedule extends Model
     public function days(int $number): self
     {
         $this->delay_minutes = $number * ConverterEnum::MINUTES_IN_DAY;
+
+        return $this;
+    }
+
+    public function precision(array $scheduleAtHours): self
+    {
+        $this->schedule_at_hours = $scheduleAtHours;
 
         return $this;
     }
@@ -368,7 +382,7 @@ class MailatorSchedule extends Model
             }
 
             return true;
-        } catch (Exception | Throwable $e) {
+        } catch (Exception|Throwable $e) {
             $this->markAsFailed($e->getMessage());
 
             app(ResolveGarbageAction::class)->handle($this);
@@ -408,7 +422,7 @@ class MailatorSchedule extends Model
                     dispatch(new SendMailJob($this));
                 }
             }
-        } catch (Exception | Throwable $e) {
+        } catch (Exception|Throwable $e) {
             $this->markAsFailed($e->getMessage());
         }
     }
@@ -427,7 +441,7 @@ class MailatorSchedule extends Model
     {
         try {
             return unserialize($this->mailable_class);
-        } catch (Throwable | TypeError $e) {
+        } catch (Throwable|TypeError $e) {
             $this->markAsFailed($e->getMessage());
         }
 
@@ -494,7 +508,7 @@ class MailatorSchedule extends Model
         return $this;
     }
 
-    public function tag(string | array $tag): self
+    public function tag(string|array $tag): self
     {
         if (is_array($tag)) {
             $tag = implode(',', $tag);

@@ -62,7 +62,7 @@ class MailatorScheduleTest extends TestCase
 
         //        MailatorSchedule::run();
         //        Mail::assertNothingSent();
-
+      
         $this->travelTo(now()->addDays(6));
         MailatorSchedule::run();
 
