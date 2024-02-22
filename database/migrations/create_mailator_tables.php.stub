@@ -30,7 +30,7 @@ class CreateMailatorTables extends Migration
             $table->json('recipients')->nullable();
             $table->text('when')->nullable();
             $table->string('frequency_option')->default(MailatorSchedule::FREQUENCY_OPTIONS_ONCE)->comment('How often send email notification.');
-
+            $table->json('schedule_at_hours')->nullable();
             $table->timestamp('last_sent_at')->nullable();
             $table->timestamp('last_failed_at')->nullable();
             $table->timestamp('completed_at')->nullable();

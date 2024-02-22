@@ -99,9 +99,29 @@ The `after` constraint accept a `CarbonInterface` as well. The difference, is th
     ->after($order->created_at)
 ```
 
+### Precision
+Hour Precision
+
+The `precision` method provides fine-grained control over when emails are sent using MailatorSchedule. It allows you to specify specific hours or intervals within a 24-hour period. Here's an example of how to use the precision method:
+```php
+    ->many()
+    ->precision([3-4])
+```
+This will schedule the email dispatch between '03:00:00' AM and '04:59:59' AM.
+
+or
+```php
+    ->once()
+    ->precision([1])
+```
+This will schedule the email dispatch between '01:00:00' AM and '01:59:59'.
+
+You can continue this pattern to specify the desired hour(s) within the range of 1 to 24.
+
+**Important: When using the precision feature in the Mailator scheduler, it is recommended to set the scheduler to run at intervals that are less than an hour. You can choose intervals such as every 5 minutes, 10 minutes, 30 minutes, or any other desired duration.**
 ### Constraint
 
-The `contraint()` method accept an instance of `Binarcode\LaravelMailator\Constraints\SendScheduleConstraint`. Each constraint will be called when the scheduler will try to send the email. If all constraints return true, the email will be sent.
+The `constraint()` method accept an instance of `Binarcode\LaravelMailator\Constraints\SendScheduleConstraint`. Each constraint will be called when the scheduler will try to send the email. If all constraints return true, the email will be sent.
 
 The `constraint()` method could be called many times, and each constraint will be stored. 
 

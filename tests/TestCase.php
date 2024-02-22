@@ -6,7 +6,6 @@ use Binarcode\LaravelMailator\LaravelMailatorServiceProvider;
 use Illuminate\Contracts\View\Factory;
 use Mockery as m;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Swift_Mailer;
 
 class TestCase extends Orchestra
 {
