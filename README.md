@@ -20,9 +20,9 @@ composer require binarcode/laravel-mailator
 
 ## Publish
 
-Publish migrations: `a vendor:publish --tag=mailator-migrations`
+Publish migrations: `php artisan vendor:publish --tag=mailator-migrations`
 
-Publish config: `a vendor:publish --tag=mailator-config`
+Publish config: `php artisan vendor:publish --tag=mailator-config`
 
 ## Usage
 
