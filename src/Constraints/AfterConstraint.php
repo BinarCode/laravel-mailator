@@ -38,13 +38,13 @@ class AfterConstraint implements SendScheduleConstraint
                 : $schedule->timestamp_target->diffInHours(now()->floorSeconds()) > $schedule->toHours();
         }
 
-        if (now()->floorSeconds()->lte($schedule->timestampTarget()->addMinutes($schedule->delay_minutes))) {
+        if (now()->floorSeconds()->lt($schedule->timestampTarget()->addMinutes($schedule->delay_minutes))) {
             return false;
         }
 
         //till ends we should have at least toDays days
         return $schedule->isOnce()
-            ? $schedule->timestamp_target->diffInHours(now()->floorSeconds()) === $schedule->delay_minutes
-            : $schedule->timestamp_target->diffInHours(now()->floorSeconds()) > $schedule->delay_minutes;
+            ? $schedule->timestamp_target->diffInMinutes(now()->floorSeconds()) >= $schedule->delay_minutes
+            : $schedule->timestamp_target->diffInMinutes(now()->floorSeconds()) > $schedule->delay_minutes;
     }
 }
