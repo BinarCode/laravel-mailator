@@ -23,7 +23,7 @@ class AfterConstraint implements SendScheduleConstraint
             }
 
             return $schedule->isOnce()
-                ? $schedule->timestamp_target->diffInDays(now()->floorSeconds()) === $schedule->toDays()
+                ? (int) $schedule->timestamp_target->diffInDays(now()->floorSeconds()) === $schedule->toDays()
                 : $schedule->timestamp_target->diffInDays(now()->floorSeconds()) > $schedule->toDays();
         }
 
@@ -34,7 +34,7 @@ class AfterConstraint implements SendScheduleConstraint
 
             //till ends we should have at least toDays days
             return $schedule->isOnce()
-                ? $schedule->timestamp_target->diffInHours(now()->floorSeconds()) === $schedule->toHours()
+                ? (int) $schedule->timestamp_target->diffInHours(now()->floorSeconds()) === $schedule->toHours()
                 : $schedule->timestamp_target->diffInHours(now()->floorSeconds()) > $schedule->toHours();
         }
 
@@ -44,7 +44,7 @@ class AfterConstraint implements SendScheduleConstraint
 
         //till ends we should have at least toDays days
         return $schedule->isOnce()
-            ? $schedule->timestamp_target->diffInHours(now()->floorSeconds()) === $schedule->delay_minutes
+            ? (int) $schedule->timestamp_target->diffInHours(now()->floorSeconds()) === $schedule->delay_minutes
             : $schedule->timestamp_target->diffInHours(now()->floorSeconds()) > $schedule->delay_minutes;
     }
 }
