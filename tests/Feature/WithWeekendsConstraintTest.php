@@ -11,6 +11,19 @@ use Spatie\TestTime\TestTime;
 
 class WithWeekendsConstraintTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        TestTime::freeze();  // Freeze time at the beginning of each test
+    }
+
+    protected function tearDown(): void
+    {
+        TestTime::unfreeze();  // Unfreeze time after each test
+
+        parent::tearDown();
+    }
+
     public function test_can_send_mail_with_precision_at_the_given_hour(): void
     {
         Mail::fake();
