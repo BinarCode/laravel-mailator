@@ -10,10 +10,13 @@ use Illuminate\Database\Eloquent\Model;
  */
 trait WithPrune
 {
-    public static function prune(DateTimeInterface $before)
+    public static function prune(DateTimeInterface $before, array $with = [])
     {
         $query = static::query()
-            ->with('logs')
+            ->when(
+                $with !== [],
+                fn ($query) => $query->with($with)
+            )
             ->where('created_at', '<', $before);
 
         $totalDeleted = 0;

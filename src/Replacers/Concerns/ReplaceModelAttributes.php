@@ -30,7 +30,7 @@ trait ReplaceModelAttributes
                     ?? '';
             }, $model);
 
-            return $replace ?? $match;
+            return $replace ?: $match;
         }, $text);
     }
 }

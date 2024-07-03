@@ -50,7 +50,7 @@ class LaravelMailatorServiceProvider extends ServiceProvider
 
             if (! class_exists('CreateMailatorTables')) {
                 $this->publishes([
-                    __DIR__ . '/../database/migrations/create_mailator_tables.php.stub' => database_path('migrations/' . date('Y_m_d_His', now()->subMinute(1)->timestamp) . '_create_mailator_tables.php'),
+                    __DIR__ . '/../database/migrations/create_mailator_tables.php.stub' => database_path('migrations/' . date('Y_m_d_His', now()->subMinute()->timestamp) . '_create_mailator_tables.php'),
                 ], 'mailator-migrations');
             }
 

@@ -13,6 +13,11 @@ class PruneMailatorScheduleCommand extends Command
 
     public function handle(): void
     {
-        $this->info(MailatorSchedule::prune(now()->subDays((int)$this->option('days'))) . ' entries pruned.');
+        $this->info(
+            MailatorSchedule::prune(
+                now()->subDays((int)$this->option('days')),
+                ['logs']
+            ) . ' entries pruned.'
+        );
     }
 }
