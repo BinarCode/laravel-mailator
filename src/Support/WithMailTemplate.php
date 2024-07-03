@@ -25,7 +25,7 @@ trait WithMailTemplate
 
         $this->template = $template;
 
-        /** * @var PersonalizeMailAction $replacerAction */
+        /** @var PersonalizeMailAction $replacerAction */
         $replacerAction = app(PersonalizeMailAction::class);
 
         // replace placehlders

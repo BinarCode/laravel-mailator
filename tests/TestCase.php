@@ -37,6 +37,8 @@ class TestCase extends Orchestra
 
     protected function getEnvironmentSetUp($app)
     {
+        $app['config']->set('queue.default', 'sync');
+
         $app['config']->set('database.default', 'sqlite');
 
         $app['config']->set('database.connections.sqlite', [
@@ -44,6 +46,7 @@ class TestCase extends Orchestra
             'database' => ':memory:',
             'prefix' => '',
         ]);
+
 
         include_once __DIR__.'/../database/migrations/create_mailator_tables.php.stub';
         (new \CreateMailatorTables())->up();

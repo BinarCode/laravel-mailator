@@ -22,9 +22,14 @@ class AfterConstraint implements SendScheduleConstraint
                 return false;
             }
 
+            $diff = (int) $schedule->timestamp_target->diffInDays(
+                now()->floorSeconds(),
+                absolute: true
+            );
+
             return $schedule->isOnce()
-                ? $schedule->timestamp_target->diffInDays(now()->floorSeconds()) === $schedule->toDays()
-                : $schedule->timestamp_target->diffInDays(now()->floorSeconds()) > $schedule->toDays();
+                ? $diff === $schedule->toDays()
+                : $diff > $schedule->toDays();
         }
 
         if ($schedule->toHours() > 0) {
@@ -32,19 +37,29 @@ class AfterConstraint implements SendScheduleConstraint
                 return false;
             }
 
+            $diff = (int) $schedule->timestamp_target->diffInHours(
+                now()->floorSeconds(),
+                absolute: true
+            );
+
             //till ends we should have at least toDays days
             return $schedule->isOnce()
-                ? $schedule->timestamp_target->diffInHours(now()->floorSeconds()) === $schedule->toHours()
-                : $schedule->timestamp_target->diffInHours(now()->floorSeconds()) > $schedule->toHours();
+                ? $diff === $schedule->toHours()
+                : $diff > $schedule->toHours();
         }
 
         if (now()->floorSeconds()->lte($schedule->timestampTarget()->addMinutes($schedule->delay_minutes))) {
             return false;
         }
 
+        $diff = (int) $schedule->timestamp_target->diffInHours(
+            now()->floorSeconds(),
+            absolute: true
+        );
+
         //till ends we should have at least toDays days
         return $schedule->isOnce()
-            ? $schedule->timestamp_target->diffInHours(now()->floorSeconds()) === $schedule->delay_minutes
-            : $schedule->timestamp_target->diffInHours(now()->floorSeconds()) > $schedule->delay_minutes;
+            ? $diff === $schedule->delay_minutes
+            : $diff > $schedule->delay_minutes;
     }
 }

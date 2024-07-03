@@ -10,7 +10,7 @@ class ModelAttributesReplacer implements Replacer
 {
     use ReplaceModelAttributes;
 
-    /** * @var Model */
+    /** @var Model */
     protected $model;
 
     public function replace(string $html, MailTemplateable $template): string
