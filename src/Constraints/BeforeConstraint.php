@@ -27,10 +27,15 @@ class BeforeConstraint implements SendScheduleConstraint
                 return false;
             }
 
+            $diff = (int) $schedule->timestampTarget()->diffInDays(
+                now()->floorSeconds(),
+                absolute: true
+            );
+
             //till ends we should have at least toDays days
             return $schedule->isOnce()
-                ? $schedule->timestampTarget()->diffInDays(now()->floorSeconds()) === $schedule->toDays()
-                : $schedule->timestampTarget()->diffInDays(now()->floorSeconds()) < $schedule->toDays();
+                ? $diff === $schedule->toDays()
+                : $diff < $schedule->toDays();
         }
 
         if ($schedule->toHours() > 0) {
@@ -38,17 +43,25 @@ class BeforeConstraint implements SendScheduleConstraint
                 return false;
             }
 
+            $diff = (int) $schedule->timestamp_target->diffInHours(
+                now()->floorSeconds(),
+                absolute: true
+            );
+
             //till ends we should have at least toHours days
             return $schedule->isOnce()
-                ? $schedule->timestamp_target->diffInHours(now()->floorSeconds()) === $schedule->toHours()
-                : $schedule->timestamp_target->diffInHours(now()->floorSeconds()) < $schedule->toHours();
+                ? $diff === $schedule->toHours()
+                : $diff < $schedule->toHours();
         }
 
-
+        $diff = (int) $schedule->timestampTarget()->diffInDays(
+            now()->floorSeconds(),
+            absolute: true
+        );
 
         //till ends we should have at least toDays days
         return $schedule->isOnce()
-            ? $schedule->timestampTarget()->diffInDays(now()->floorSeconds()) === $schedule->toDays()
-            : $schedule->timestampTarget()->diffInDays(now()->floorSeconds()) < $schedule->toDays();
+            ? $diff === $schedule->toDays()
+            : $diff < $schedule->toDays();
     }
 }
