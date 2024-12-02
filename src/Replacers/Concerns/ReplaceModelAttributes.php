@@ -19,18 +19,20 @@ trait ReplaceModelAttributes
 {
     public function replaceModelAttributes(string $text, string $replaceText, Model $model)
     {
-        return preg_replace_callback('/::' . $replaceText . '::/', function ($match) use ($model) {
+        return preg_replace_callback('/::'.$replaceText.'::/', function ($match) use ($model) {
             $parts = collect(explode('.', $match[0] ?? ''));
 
             $replace = $parts->reduce(function ($value, $part) {
                 $part = Str::between($part, '::', '::');
 
-                return $value->$part
-                    ?? $value[$part]
-                    ?? '';
+                return $value->$part ?? $value[$part] ?? '';
             }, $model);
 
-            return $replace ?: $match;
+            if (is_array($replace)) {
+                return implode(', ', $replace);
+            }
+
+            return $replace ?: $match[0];
         }, $text);
     }
 }
