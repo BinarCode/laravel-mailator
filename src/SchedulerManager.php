@@ -24,7 +24,7 @@ class SchedulerManager
 
     public function __destruct()
     {
-        if ($this->instance && ! $this->instance->wasRecentlyCreated) {
+        if (isset($this->instance) && $this->instance && ! $this->instance->wasRecentlyCreated) {
             $this->instance->save();
         }
     }
