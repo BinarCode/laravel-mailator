@@ -12,7 +12,6 @@ use RuntimeException;
 
 class AllowNonPublicPropertiesTest extends TestCase
 {
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -83,4 +82,3 @@ class AllowNonPublicPropertiesTest extends TestCase
             ->execute();
     }
 }
-
