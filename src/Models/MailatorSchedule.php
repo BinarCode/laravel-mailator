@@ -28,6 +28,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Opis\Closure\SerializableClosure;
+use ReflectionClass;
+use RuntimeException;
 use Throwable;
 use TypeError;
 
@@ -106,6 +108,10 @@ class MailatorSchedule extends Model
 
     public function mailable(Mailable $mailable): self
     {
+        if (config('mailator.serialization.enforce_public_properties') && $this->hasNonPublicConstructorProps($mailable)) {
+            throw new RuntimeException('Mailable contains non-public constructor properties which cannot be safely serialized');
+        }
+
         if ($mailable instanceof Constraintable) {
             collect($mailable->constraints())
                 ->filter(fn ($constraint) => $constraint instanceof SendScheduleConstraint)
@@ -597,5 +603,20 @@ class MailatorSchedule extends Model
         }
 
         return parent::save($options);
+    }
+
+    private function hasNonPublicConstructorProps(Mailable $mailable): bool
+    {
+        $reflection = new ReflectionClass($mailable);
+        $constructor = $reflection->getConstructor();
+
+        if (! $constructor) {
+            return false;
+        }
+
+        return collect($constructor->getParameters())
+            ->filter(fn ($param) => $reflection->getProperty($param->getName())->isPrivate()
+                || $reflection->getProperty($param->getName())->isProtected())
+            ->isNotEmpty();
     }
 }
