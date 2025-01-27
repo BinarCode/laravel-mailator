@@ -63,4 +63,14 @@ return [
             Binarcode\LaravelMailator\Replacers\SampleReplacer::class,
         ],
     ],
+
+    'serialization' => [
+        /*
+        > Controls constructor property accessibility in mailable objects for PostgreSQL compatibility.
+        > When set to false, allows private/protected properties. When true, enforces
+        > public properties only to prevent PostgreSQL serialization errors caused by
+        > null bytes (\x00) in non-public properties.
+        */
+        'enforce_public_properties' => false,
+    ]
 ];
