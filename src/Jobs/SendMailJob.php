@@ -5,12 +5,13 @@ namespace Binarcode\LaravelMailator\Jobs;
 use Binarcode\LaravelMailator\Models\MailatorSchedule;
 use Binarcode\LaravelMailator\Support\ClassResolver;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class SendMailJob implements ShouldQueue
+class SendMailJob implements ShouldBeUnique, ShouldQueue
 {
     use ClassResolver;
     use Dispatchable;
@@ -30,6 +31,11 @@ class SendMailJob implements ShouldQueue
         $this->schedule = $schedule;
 
         $this->queue = config('mailator.scheduler.send_mail_job_queue', 'default');
+    }
+
+    public function uniqueId(): string
+    {
+        return 'mailator-schedule-'.$this->schedule->id;
     }
 
     public function handle(): void

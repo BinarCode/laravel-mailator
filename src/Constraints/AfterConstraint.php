@@ -52,7 +52,7 @@ class AfterConstraint implements SendScheduleConstraint
             return false;
         }
 
-        $diff = (int) $schedule->timestamp_target->diffInHours(
+        $diff = (int) $schedule->timestamp_target->diffInMinutes(
             now()->floorSeconds(),
             absolute: true
         );
