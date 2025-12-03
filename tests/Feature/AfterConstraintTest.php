@@ -94,4 +94,47 @@ class AfterConstraintTest extends TestCase
             $can
         );
     }
+
+    public function test_past_target_with_after_now_passed_after_constraint_minutes_bases()
+    {
+        Mail::fake();
+        Mail::assertNothingSent();
+
+        $scheduler = MailatorSchedule::init('reminder')
+            ->recipients('zoo@bar.com')
+            ->mailable(
+                (new InvoiceReminderMailable())->to('foo@bar.com')
+            )
+            ->minutes(10)
+            ->after(now());
+
+        $scheduler->save();
+
+        $this->travelTo(now()->addMinutes(5));
+
+        self::assertTrue(
+            $scheduler->fresh()->isFutureAction()
+        );
+
+        $this->travelTo(now()->addMinutes(5));
+
+        self::assertTrue(
+            app(AfterConstraint::class)
+                ->canSend(
+                    $scheduler,
+                    $scheduler->logs
+                )
+        );
+
+        $this->travelTo(now()->addMinutes(5));
+
+        // as long as we have passed the "after" minutes target this should return true
+        self::assertTrue(
+            app(AfterConstraint::class)
+                ->canSend(
+                    $scheduler,
+                    $scheduler->logs
+                )
+        );
+    }
 }
