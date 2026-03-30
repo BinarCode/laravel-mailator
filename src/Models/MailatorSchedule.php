@@ -29,7 +29,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Opis\Closure\SerializableClosure;
+use Opis\Closure\Serializer as ClosureSerializer;
 use ReflectionClass;
 use RuntimeException;
 use Throwable;
@@ -354,9 +354,7 @@ class MailatorSchedule extends Model
 
     public function when(Closure $closure): self
     {
-        $this->when = serialize(
-            new SerializableClosure($closure)
-        );
+        $this->when = ClosureSerializer::serialize($closure);
 
         return $this;
     }
