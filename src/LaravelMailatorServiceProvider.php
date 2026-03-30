@@ -17,7 +17,7 @@ class LaravelMailatorServiceProvider extends ServiceProvider
     /**
      * Bootstrap the application services.
      */
-    public function boot()
+    public function boot(): void
     {
         if (config('mailator.scheduler.model')) {
             $this->app->bind(MailatorSchedule::class, config('mailator.model'));
@@ -88,7 +88,7 @@ class LaravelMailatorServiceProvider extends ServiceProvider
     /**
      * Register the application services.
      */
-    public function register()
+    public function register(): void
     {
         // Automatically apply the package configuration
         $this->mergeConfigFrom(__DIR__.'/../config/mailator.php', 'mailator');
